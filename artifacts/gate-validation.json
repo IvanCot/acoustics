@@ -1,357 +1,364 @@
 {
-  "created": "2026-10-16T16:45:00.666400+00:00",
+  "created": "2026-10-16T20:12:39.182046+00:00",
+  "pipeline": "impact-cascade-v3-light-denoise",
   "split": "val",
-  "n": 24,
-  "model_id": "e6d25863a582",
-  "gate_id": "a875615f8bed",
-  "gate_threshold": 0.65,
-  "gate_accuracy": 1.0,
-  "labels": [
-    "knock",
-    "other"
-  ],
-  "gate_confusion": [
-    [
-      12,
-      0
-    ],
-    [
-      0,
-      12
-    ]
-  ],
-  "false_accepts": 0,
-  "false_rejects": 0,
-  "cascade_accuracy": 1.0,
-  "warnings": [
-    "Сессия manual_20261016: разбиение по файлам; train, val и test не являются независимыми сессиями.",
-    "Сессия realised_background: разбиение по файлам; train, val и test не являются независимыми сессиями.",
-    "Manual positives and ReaLISED negatives use different recording sources. Source shortcuts can inflate these validation results. Source labels were used without auditioning every clip."
-  ],
-  "examples": [
-    {
-      "path": "val/metal/manual_20261016/metal13.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9885661663511376,
-        "other": 0.011433833648862418
-      },
-      "material_scores": {
-        "metal": 0.9744263621268178,
-        "wood": 0.025573637873182214
-      },
-      "correct": true
+  "gate_id": "a9970aac03de",
+  "selected": "denoise_augmented",
+  "results": {
+    "clean": {
+      "n": 24,
+      "correct": 24,
+      "gate_correct": 24,
+      "material_correct": 12,
+      "n_material": 12,
+      "examples": [
+        {
+          "path": "val/metal/manual_20261016/metal13.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal16.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal17.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal22.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal30.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal36.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood15.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood2.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood20.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood28.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood29.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood9.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/other/realised_background/spe_125_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/spe_134_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/spe_135_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_103_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_107_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_114_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_153_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_154_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_155_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_105_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_114_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_117_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        }
+      ]
     },
-    {
-      "path": "val/metal/manual_20261016/metal16.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.8935618145987058,
-        "other": 0.10643818540129421
-      },
-      "material_scores": {
-        "metal": 0.9948844416981797,
-        "wood": 0.005115558301820322
-      },
-      "correct": true
-    },
-    {
-      "path": "val/metal/manual_20261016/metal17.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9530841782541014,
-        "other": 0.04691582174589859
-      },
-      "material_scores": {
-        "metal": 0.9996698395357502,
-        "wood": 0.0003301604642498517
-      },
-      "correct": true
-    },
-    {
-      "path": "val/metal/manual_20261016/metal22.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9930069822646098,
-        "other": 0.006993017735390144
-      },
-      "material_scores": {
-        "metal": 0.9933985607230761,
-        "wood": 0.00660143927692393
-      },
-      "correct": true
-    },
-    {
-      "path": "val/metal/manual_20261016/metal30.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9953559765122446,
-        "other": 0.0046440234877553515
-      },
-      "material_scores": {
-        "metal": 0.9532736653990903,
-        "wood": 0.04672633460090964
-      },
-      "correct": true
-    },
-    {
-      "path": "val/metal/manual_20261016/metal36.wav",
-      "actual": "metal",
-      "predicted": "metal",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9435192826925506,
-        "other": 0.05648071730744939
-      },
-      "material_scores": {
-        "metal": 0.9782599028945237,
-        "wood": 0.021740097105476346
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood15.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9763911123047383,
-        "other": 0.02360888769526173
-      },
-      "material_scores": {
-        "metal": 0.03341334946741881,
-        "wood": 0.9665866505325812
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood2.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9856236772524846,
-        "other": 0.014376322747515427
-      },
-      "material_scores": {
-        "metal": 0.011249578122771942,
-        "wood": 0.9887504218772281
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood20.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9869741744951477,
-        "other": 0.013025825504852309
-      },
-      "material_scores": {
-        "metal": 0.03120291020080368,
-        "wood": 0.9687970897991963
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood28.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9964697739257844,
-        "other": 0.0035302260742156384
-      },
-      "material_scores": {
-        "metal": 0.05344426298081939,
-        "wood": 0.9465557370191806
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood29.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9893672967208978,
-        "other": 0.010632703279102106
-      },
-      "material_scores": {
-        "metal": 0.009993289323548926,
-        "wood": 0.9900067106764511
-      },
-      "correct": true
-    },
-    {
-      "path": "val/wood/manual_20261016/wood9.wav",
-      "actual": "wood",
-      "predicted": "wood",
-      "gate_status": "accepted",
-      "gate_scores": {
-        "knock": 0.9974425923343111,
-        "other": 0.0025574076656889053
-      },
-      "material_scores": {
-        "metal": 0.042528625719962077,
-        "wood": 0.9574713742800379
-      },
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/spe_125_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.05871329099463207,
-        "other": 0.9412867090053679
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/spe_134_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.008866088695941965,
-        "other": 0.991133911304058
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/spe_135_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.042533254990408054,
-        "other": 0.957466745009592
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/tel_103_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.07613978509931807,
-        "other": 0.9238602149006819
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/tel_107_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.02230255610969023,
-        "other": 0.9776974438903098
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/tel_114_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.007008241195875287,
-        "other": 0.9929917588041247
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/vac_153_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.05227446409220737,
-        "other": 0.9477255359077926
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/vac_154_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.005732976084217856,
-        "other": 0.9942670239157821
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/vac_155_00_00_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.0018200119046415386,
-        "other": 0.9981799880953585
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/wat_105_00_05_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.0004927897102975365,
-        "other": 0.9995072102897025
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/wat_114_00_05_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.0013398101568995457,
-        "other": 0.9986601898431005
-      },
-      "material_scores": null,
-      "correct": true
-    },
-    {
-      "path": "val/other/realised_background/wat_117_00_05_0.wav",
-      "actual": "other",
-      "predicted": "other",
-      "gate_status": "rejected",
-      "gate_scores": {
-        "knock": 0.0008788477969079445,
-        "other": 0.9991211522030921
-      },
-      "material_scores": null,
-      "correct": true
+    "noisy": {
+      "n": 24,
+      "correct": 23,
+      "gate_correct": 23,
+      "material_correct": 12,
+      "n_material": 12,
+      "examples": [
+        {
+          "path": "val/metal/manual_20261016/metal13.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal16.wav",
+          "actual": "metal",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/metal/manual_20261016/metal17.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal22.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal30.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/metal/manual_20261016/metal36.wav",
+          "actual": "metal",
+          "predicted": "metal",
+          "direct": "metal",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood15.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood2.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood20.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood28.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood29.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/wood/manual_20261016/wood9.wav",
+          "actual": "wood",
+          "predicted": "wood",
+          "direct": "wood",
+          "accepted": true
+        },
+        {
+          "path": "val/other/realised_background/spe_125_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/spe_134_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/spe_135_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_103_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_107_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/tel_114_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "metal",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_153_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_154_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/vac_155_00_00_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_105_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_114_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        },
+        {
+          "path": "val/other/realised_background/wat_117_00_05_0.wav",
+          "actual": "other",
+          "predicted": "other",
+          "direct": "wood",
+          "accepted": false
+        }
+      ]
     }
-  ]
+  },
+  "limitations": "Shared capture sessions and source differences can inflate these metrics."
 }

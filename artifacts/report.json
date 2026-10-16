@@ -1,8 +1,8 @@
 {
-  "created": "2026-10-16T16:58:51.758709+00:00",
+  "created": "2026-10-16T20:30:21.301274+00:00",
   "mode": "cascade",
-  "model_id": "c0814e93b642",
-  "gate_id": "8ae88610a88d",
+  "model_id": "c2c95c3fded4",
+  "gate_id": "a9970aac03de",
   "test_signature": "075ee059571f4bcea46a03acb07b31e94f4510f57416b18b14cb070a3942b9d8",
   "n_test": 24,
   "accuracy": 1.0,

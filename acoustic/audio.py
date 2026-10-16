@@ -16,11 +16,40 @@ import soundfile as sf
 SAMPLE_RATE = 16000
 DURATION = 2.0
 MAX_BYTES = 12 * 1024 * 1024
-PIPELINE_VERSION = "impact-cascade-v2"
+PIPELINE_VERSION = "impact-cascade-v3-light-denoise"
+TRAINING_AUGMENTATION = {"seed": 42, "variants_per_recording": 2,
+                         "gains": [0.8, 1.15], "noise_snr_db": [30, 35]}
 
 
 class ExperimentError(ValueError):
     pass
+
+
+def light_denoise(y: np.ndarray) -> np.ndarray:
+    """Estimate background from quiet frames; limit attenuation to about 3.7 dB."""
+    spectrum = librosa.stft(y, n_fft=512, hop_length=128)
+    power = np.abs(spectrum) ** 2
+    energy = power.mean(axis=0)
+    quiet = np.argsort(energy)[:max(1, len(energy) // 5)]
+    # A continuous event is not evidence of a separate background noise floor.
+    if float(np.mean(energy[quiet])) >= 0.15 * float(energy.max()):
+        return y.copy()
+    noise = np.median(power[:, quiet], axis=1, keepdims=True)
+    gain = np.sqrt(np.maximum(1 - 0.5 * noise / np.maximum(power, 1e-20), 0.65 ** 2))
+    return librosa.istft(spectrum * gain, hop_length=128, length=len(y)).astype(np.float32)
+
+
+def training_waveform(y: np.ndarray, raw_hash: str, variant: int) -> np.ndarray:
+    """Deterministic gain and low white noise, before the shared denoiser."""
+    if variant not in (0, 1):
+        raise ValueError("Unknown training augmentation variant")
+    rng = np.random.default_rng(int(raw_hash[:16], 16) + TRAINING_AUGMENTATION["seed"] + variant)
+    changed = y * TRAINING_AUGMENTATION["gains"][variant]
+    rms = float(np.sqrt(np.mean(changed ** 2)))
+    noise = rng.standard_normal(len(y))
+    noise /= max(float(np.sqrt(np.mean(noise ** 2))), 1e-12)
+    changed = changed + noise * rms / 10 ** (TRAINING_AUGMENTATION["noise_snr_db"][variant] / 20)
+    return changed.astype(np.float32)
 
 
 def detection_features(y: np.ndarray) -> np.ndarray:
@@ -47,7 +76,8 @@ def detection_features(y: np.ndarray) -> np.ndarray:
     return np.r_[spectrum, temporal]
 
 
-def process(raw: bytes, filename: str, *, allow_unsuitable: bool = False) -> dict:
+def process(raw: bytes, filename: str, *, allow_unsuitable: bool = False,
+            training_variant: int | None = None) -> dict:
     if Path(filename).suffix.lower() not in {".wav", ".mp3"}:
         raise ExperimentError("Поддерживаются только WAV и MP3.")
     if not raw or len(raw) > MAX_BYTES:
@@ -81,6 +111,9 @@ def process(raw: bytes, filename: str, *, allow_unsuitable: bool = False) -> dic
     if rejection and not allow_unsuitable:
         raise ExperimentError(rejection["reason"])
     y = librosa.resample(y, orig_sr=native_sr, target_sr=SAMPLE_RATE)
+    if training_variant is not None and not rejection:
+        y = training_waveform(y, hashlib.sha256(raw).hexdigest(), training_variant)
+    y = light_denoise(y)
     detector_features = detection_features(y)
     # Align on the earliest high-energy frame, not the arbitrary file start.
     energy = librosa.feature.rms(y=y, frame_length=256, hop_length=64)[0]
@@ -122,6 +155,7 @@ def process(raw: bytes, filename: str, *, allow_unsuitable: bool = False) -> dic
             "raw_hash": hashlib.sha256(raw).hexdigest(), "warnings": warnings,
             "info": {"source_duration": round(duration, 3), "source_sample_rate": native_sr,
                      "sample_rate": SAMPLE_RATE, "duration": DURATION, "features": len(features),
+                     "denoising": "light_spectral_3.7db_max",
                      "centroid_hz": round(float(matrices[1][:, active].mean())),
                      "onset_seconds": round(start / SAMPLE_RATE, 3)}}
 

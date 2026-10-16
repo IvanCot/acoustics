@@ -3,12 +3,12 @@ const $ = (id) => document.getElementById(id);
 const materials = ["wood", "metal"];
 const labels = {wood: "Дерево", metal: "Металл", other: "Неподходящий звук", knock: "Стук"};
 const analysisMode = () => document.querySelector('input[name="analysis-mode"]:checked').value;
-const splitLabels = {train: "Обучение", val: "Валидация", test: "Проверка", demo: "Защита"};
+const splitLabels = {train: "Обучение", val: "Валидация", test: "Проверка", demo: "Вне оценки"};
 const headings = {
-  analyze: ["Звук как улика.", "Дерево или металл? Исследуйте короткий стук по вашему предмету."],
+  analyze: ["Звук как улика.", "Дерево или металл? Определите материал по короткому стуку."],
   dataset: ["Данные и обучение", "Собственные записи, независимые сессии и прозрачное обучение."],
-  quality: ["Проверка на новых записях", "Измеренное качество, реальные ошибки и границы эксперимента."],
-  protocol: ["Протокол записи", "Практическая инструкция для сбора данных и защиты проекта."]
+  quality: ["Проверка качества", "Точность, ошибки и условия, в которых работает классификатор."],
+  protocol: ["Руководство", "Как записывать звуки, обучать модели и оценивать результат."]
 };
 let state = null, selectedFile = null, lastResult = null, isBusy = false, recording = null, recordingPending = false;
 let batch = [], batchMode = null, activeBatchIndex = -1;
@@ -99,8 +99,19 @@ function renderState() {
   $("train-count").textContent = counts.train.wood + counts.train.metal + counts.train.other;
   $("test-count").textContent = counts.test.wood + counts.test.metal + counts.test.other;
   $("accuracy-summary").textContent = state.report ? pct(state.report.accuracy) : "Не измерена";
-  $("data-summary").innerHTML = Object.keys(splitLabels).map(split => `<div class="data-stat"><h2>${splitLabels[split]} <span class="micro-label">${split.toUpperCase()}</span></h2><div class="count">${counts[split].wood + counts[split].metal + counts[split].other}</div><small>Дерево: ${counts[split].wood} · Металл: ${counts[split].metal}<br>Неподходящие: ${counts[split].other}</small></div>`).join("");
-  $("training-status").textContent = `01 · Детектор: ${state.gate_trained ? "готов · " + state.gate_model.n_train + " записей" : "нужны обучение и корректные данные"}\n02 · Материал: ${state.material_trained ? "готов · " + state.model.n_train + " стуков" : "нужны обучение и корректные данные"}`;
+  const fitCount = (model) => model?.n_fit && model.n_fit > model.n_train
+    ? ` · ${model.n_fit} примеров с аугментацией` : "";
+  $("data-summary").innerHTML = Object.keys(splitLabels).map(split => {
+    const recordings = counts[split].wood + counts[split].metal + counts[split].other;
+    const trainingDetails = split === "train" && state.model && state.gate_model
+      ? `<br>Исходных записей: ${recordings}<br>Материал: ${state.model.n_fit ?? state.model.n_train} · Детектор: ${state.gate_model.n_fit ?? state.gate_model.n_train} примеров`
+      : "";
+    const count = split === "train" && state.model && state.gate_model
+      ? (state.model.n_fit ?? recordings) + (state.gate_model.n_fit ?? recordings) : recordings;
+    const badge = split === "train" && state.model && state.gate_model ? "ПРИМЕРОВ МОДЕЛЕЙ" : split.toUpperCase();
+    return `<div class="data-stat"><h2>${splitLabels[split]} <span class="micro-label">${badge}</span></h2><div class="count">${count}</div><small>Дерево: ${counts[split].wood} · Металл: ${counts[split].metal}<br>Неподходящие: ${counts[split].other}${trainingDetails}</small></div>`;
+  }).join("");
+  $("training-status").textContent = `01 · Детектор: ${state.gate_trained ? "готов · " + state.gate_model.n_train + " записей" + fitCount(state.gate_model) : "нужны обучение и корректные данные"}\n02 · Материал: ${state.material_trained ? "готов · " + state.model.n_train + " стуков" + fitCount(state.model) : "нужны обучение и корректные данные"}`;
   const issues = [...state.issues, ...state.errors.map(e => `${e.path}: ${e.error}`)];
   $("data-issues").innerHTML = issues.length ? `<div class="notice"><strong>Исправьте данные перед обучением</strong><ul>${issues.map(e => `<li>${escapeHTML(e)}</li>`).join("")}</ul></div>` : "";
   if (state.warnings?.length) $("data-issues").innerHTML += `<div class="notice neutral">${state.warnings.map(escapeHTML).join("<br>")}</div>`;
@@ -278,7 +289,7 @@ function showBatchResult(index) {
     const score = lastResult.scores[lastResult.prediction];
     $("result-kicker").textContent = "ПРЕДПОЛАГАЕМЫЙ МАТЕРИАЛ";
     $("result-title").textContent = labels[lastResult.prediction];
-    $("result-description").textContent = score < 0.65 ? "Баллы классов близки. Вывод неустойчив — сравните с известным материалом и повторите запись." : "Модель выбрала этот класс среди двух известных. Это экспериментальный прогноз, его нужно проверить.";
+    $("result-description").textContent = score < 0.65 ? "Баллы классов близки. Вывод неустойчив — сравните с известным материалом и повторите запись." : "Модель выбрала этот класс среди двух известных. Сверьте результат с известным материалом.";
     for (const label of materials) {
       $("score-" + label).textContent = pct(lastResult.scores[label]);
       $("bar-" + label).value = lastResult.scores[label];
@@ -336,6 +347,16 @@ function drawPlots() {
 }
 
 function renderReport() {
+  const validation = state.validation;
+  const panel = $("validation-summary");
+  panel.hidden = !validation;
+  if (validation) {
+    const selected = validation[validation.selected];
+    const clean = selected.clean;
+    const noisy = selected.noisy;
+    const baseline = validation.denoise.noisy;
+    panel.innerHTML = `<div class="panel-heading"><h2>Валидация · выбор обработки</h2><span class="tag">${clean.correct}/${clean.n} без добавленного шума</span></div><p>На ${noisy.n} валидационных записях с искусственным шумом (SNR 20 дБ): <strong>${noisy.correct}/${noisy.n}</strong> верно с аугментацией, ${baseline.correct}/${baseline.n} без неё.</p><p class="helper">Это сравнение на val для выбора обработки. Искусственно зашумлённые копии не являются реальными записями. Test оценивается отдельно кнопкой выше.</p>`;
+  }
   const report = state.report?.mode === $("evaluation-mode").value ? state.report : null;
   $("quality-empty").hidden = !!report;
   $("quality-results").hidden = !report;

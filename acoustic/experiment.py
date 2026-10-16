@@ -12,7 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix, f1_score
 from sklearn.preprocessing import StandardScaler
 
-from .audio import ExperimentError, PIPELINE_VERSION, process, playback
+from .audio import ExperimentError, PIPELINE_VERSION, TRAINING_AUGMENTATION, process, playback
 
 CLASSES = ["metal", "wood"]  # sklearn sorted binary class order
 DATA_CLASSES = [*CLASSES, "other"]
@@ -109,6 +109,9 @@ class Experiment:
         rows, errors = self.scan()
         model, gate = self.read_json("model.json"), self.read_json("gate.json")
         report = self.read_json("report.json")
+        validation = self.read_json("validation.json")
+        if not validation or validation.get("pipeline") != PIPELINE_VERSION:
+            validation = None
         counts = {s: {c: sum(r["split"] == s and r["label"] == c for r in rows) for c in DATA_CLASSES} for s in SPLITS}
         file_splits = self.file_split_sessions()
         issues = self.integrity(rows, file_splits)
@@ -130,14 +133,14 @@ class Experiment:
         can_evaluate_material = material_ready and all(counts["test"][c] >= 2 for c in CLASSES)
         can_evaluate = ready and can_evaluate_material and counts["test"]["other"] >= 2
         def passport(value):
-            return {k: value[k] for k in ["id", "created", "n_train", "sessions", "pipeline"]} if value else None
+            return {k: value.get(k) for k in ["id", "created", "n_train", "n_fit", "augmentation", "sessions", "pipeline"]} if value else None
         return {"classes": LABELS, "counts": counts, "rows": [{k: v for k, v in r.items() if k != "audio"} for r in rows],
                 "errors": errors, "issues": issues, "warnings": warnings, "trained": ready, "stale": bool(model and not ready),
                 "material_trained": material_ready, "gate_trained": gate_ready,
                 "can_train": can_material and can_gate, "can_train_material": can_material, "can_train_gate": can_gate,
                 "can_evaluate": can_evaluate, "can_evaluate_material": can_evaluate_material,
                 "model": passport(model), "gate_model": passport(gate),
-                "report": report if report_valid else None}
+                "report": report if report_valid else None, "validation": validation}
 
     def add(self, raw, filename, split, label, session):
         if split not in SPLITS or label not in DATA_CLASSES:
@@ -157,7 +160,7 @@ class Experiment:
         path.write_bytes(raw)
         return {"saved": path.relative_to(self.data).as_posix()}
 
-    def train(self, stage="both"):
+    def train(self, stage="both", *, augment=True):
         state = self.state()
         if stage not in {"both", "gate", "material"}:
             raise ExperimentError("Неизвестный этап обучения.")
@@ -167,6 +170,12 @@ class Experiment:
             raise ExperimentError("Для детектора нужны минимум 4 стука (дерево/металл) и 4 неподходящих звука в train без ошибок данных.")
         rows, _ = self.scan()
         train = [r for r in rows if r["split"] == "train"]
+        if augment:
+            for row in train:
+                raw = (self.data / row["path"]).read_bytes()
+                row["augmented_audio"] = [process(raw, row["path"], allow_unsuitable=True,
+                                                  training_variant=i)
+                                          for i in range(TRAINING_AUGMENTATION["variants_per_recording"])]
         if stage in {"both", "material"}:
             material = [r for r in train if r["label"] in CLASSES]
             self.fit_model(material, "features", [r["label"] for r in material], "model.json", CLASSES)
@@ -175,13 +184,18 @@ class Experiment:
         return self.state()
 
     def fit_model(self, train, features, y, filename, labels=None):
-        x = np.array([r["audio"][features] for r in train])
+        samples = [(audio[features], label) for row, label in zip(train, y)
+                   for audio in [row["audio"], *row.get("augmented_audio", [])]]
+        x = np.array([values for values, _ in samples])
+        y = [label for _, label in samples]
         scaler = StandardScaler().fit(x)  # Never fit on held-out data.
         classifier = LogisticRegression(C=0.5, class_weight="balanced", max_iter=1000, random_state=42).fit(scaler.transform(x), y)
         created = stamp()
         signature = self.signature(train, "train", labels)
         model = {"id": hashlib.sha256((created + signature).encode()).hexdigest()[:12],
                  "pipeline": PIPELINE_VERSION, "created": created, "n_train": len(train),
+                 "n_fit": len(samples),
+                 "augmentation": TRAINING_AUGMENTATION if len(samples) > len(train) else None,
                  "sessions": sorted(set(r["session"] for r in train)), "train_signature": signature,
                  "file_split_sessions": self.file_split_sessions(),
                  "classes": classifier.classes_.tolist(), "mean": scaler.mean_.tolist(), "scale": scaler.scale_.tolist(),
@@ -234,9 +248,9 @@ class Experiment:
         known = sorted(set(r["split"] for r in rows if r["audio"]["raw_hash"] == audio["raw_hash"] or
                            r["audio"]["canonical_hash"] == audio["canonical_hash"]))
         if known == ["demo"]:
-            audio["warnings"].append("Запись хранится в demo и не участвовала в обучении или оценке. Для защиты используйте ранее не показанные дубли.")
+            audio["warnings"].append("Эта запись сохранена вне оценки и не участвовала в обучении или проверке. Для независимой оценки используйте новый дубль.")
         elif known:
-            audio["warnings"].append("Эта запись уже есть в данных: " + ", ".join(known) + ". Она не является новой для демонстрации.")
+            audio["warnings"].append("Эта запись уже есть в данных: " + ", ".join({"demo": "вне оценки"}.get(split, split) for split in known) + ". Для независимой проверки используйте новый дубль.")
         return {"prediction": prediction, "scores": scores, "mode": mode, "gate": gate, "known_splits": known,
                 "info": audio["info"], "warnings": audio["warnings"], "waveform": audio["waveform"],
                 "spectrogram": audio["spectrogram"], "playback": base64.b64encode(playback(audio["samples"])).decode(),

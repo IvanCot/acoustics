@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 import numpy as np
 import soundfile as sf
 
-from acoustic.audio import ExperimentError, process
+from acoustic.audio import ExperimentError, light_denoise, process, training_waveform
 from acoustic.experiment import Experiment
 from server import make_handler
 
@@ -61,6 +61,31 @@ def background(seed=0, silent=False):
 
 
 class AudioTests(unittest.TestCase):
+    def test_light_denoiser_reduces_background_and_preserves_impact(self):
+        rng = np.random.default_rng(42)
+        y = rng.normal(0, .004, 32000).astype(np.float32)
+        y[8000] += .7
+        clean = light_denoise(y)
+        self.assertEqual(clean.shape, y.shape)
+        self.assertTrue(np.isfinite(clean).all())
+        self.assertLess(np.mean(clean[:6000] ** 2), np.mean(y[:6000] ** 2))
+        self.assertGreater(abs(clean[8000]), .95 * abs(y[8000]))
+        np.testing.assert_array_equal(light_denoise(np.zeros(32000)), np.zeros(32000))
+
+    def test_augmentation_is_repeatable_and_used_before_shared_denoiser(self):
+        y = np.sin(np.arange(16000) * .1).astype(np.float32) * .1
+        a = training_waveform(y, 'a' * 64, 0)
+        np.testing.assert_array_equal(a, training_waveform(y, 'a' * 64, 0))
+        self.assertFalse(np.allclose(a, training_waveform(y, 'a' * 64, 1)))
+        self.assertEqual(a.shape, y.shape)
+        with self.assertRaises(ValueError):
+            training_waveform(y, 'a' * 64, 2)
+        raw = signal()
+        first = process(raw, 'sample.wav', training_variant=0)
+        second = process(raw, 'sample.wav', training_variant=0)
+        np.testing.assert_array_equal(first['features'], second['features'])
+        self.assertEqual(first['raw_hash'], process(raw, 'sample.wav')['raw_hash'])
+
     def test_one_pipeline_resamples_stereo_aligns_and_pads(self):
         result = process(signal(rate=44100, channels=2), "stereo.wav")
         self.assertEqual(result["samples"].shape, (32000,))
@@ -268,8 +293,11 @@ class ExperimentTests(unittest.TestCase):
         self.experiment.train()
         first = self.experiment.read_json("model.json")
         first_gate = self.experiment.read_json("gate.json")
+        self.assertEqual(first["n_fit"], 3 * first["n_train"])
+        self.assertEqual(first_gate["n_fit"], 3 * first_gate["n_train"])
         self.experiment.evaluate()
         self.experiment.add(signal(60, 6000), "outlier.wav", "test", "wood", "s02")
+        self.experiment.add(signal(61, 5900), "validation.wav", "val", "wood", "s03")
         self.assertIsNone(self.experiment.state()["report"])
         self.assertTrue(self.experiment.state()["trained"])
         self.experiment.train()
