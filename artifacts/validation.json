@@ -1,0 +1,147 @@
+{
+  "created": "2026-10-16T15:10:55.522671+00:00",
+  "split": "val",
+  "mode": "material",
+  "model_id": "e6d25863a582",
+  "n": 12,
+  "accuracy": 1.0,
+  "labels": [
+    "metal",
+    "wood"
+  ],
+  "confusion": [
+    [
+      6,
+      0
+    ],
+    [
+      0,
+      6
+    ]
+  ],
+  "warnings": [
+    "Сессия manual_20261016: разбиение по файлам; train, val и test не являются независимыми сессиями."
+  ],
+  "examples": [
+    {
+      "path": "val/metal/manual_20261016/metal13.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9744263621268178,
+        "wood": 0.025573637873182214
+      },
+      "correct": true
+    },
+    {
+      "path": "val/metal/manual_20261016/metal16.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9948844416981797,
+        "wood": 0.005115558301820322
+      },
+      "correct": true
+    },
+    {
+      "path": "val/metal/manual_20261016/metal17.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9996698395357502,
+        "wood": 0.0003301604642498517
+      },
+      "correct": true
+    },
+    {
+      "path": "val/metal/manual_20261016/metal22.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9933985607230761,
+        "wood": 0.00660143927692393
+      },
+      "correct": true
+    },
+    {
+      "path": "val/metal/manual_20261016/metal30.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9532736653990903,
+        "wood": 0.04672633460090964
+      },
+      "correct": true
+    },
+    {
+      "path": "val/metal/manual_20261016/metal36.wav",
+      "actual": "metal",
+      "predicted": "metal",
+      "scores": {
+        "metal": 0.9782599028945237,
+        "wood": 0.021740097105476346
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood15.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.03341334946741881,
+        "wood": 0.9665866505325812
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood2.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.011249578122771942,
+        "wood": 0.9887504218772281
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood20.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.03120291020080368,
+        "wood": 0.9687970897991963
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood28.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.05344426298081939,
+        "wood": 0.9465557370191806
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood29.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.009993289323548926,
+        "wood": 0.9900067106764511
+      },
+      "correct": true
+    },
+    {
+      "path": "val/wood/manual_20261016/wood9.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "scores": {
+        "metal": 0.042528625719962077,
+        "wood": 0.9574713742800379
+      },
+      "correct": true
+    }
+  ]
+}

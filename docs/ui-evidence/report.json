@@ -1,0 +1,26 @@
+{
+  "contract": "docs/DESIGN.md: expressive acoustic instrument, graphite/lime/orange, two-line display typography, luminous upload plane, truthful empty states and independent input/signal/result channels.",
+  "targetViewports": ["1440x1000", "390x844", "320x800"],
+  "accessibility": {
+    "status": "pass",
+    "evidence": "Chrome Lighthouse snapshot on final desktop analyzer: accessibility 100, 30 passed audits, 0 failed. Final mobile dataset: accessibility 100, 33 passed, 0 failed. Tab moves between labelled navigation links with a visible outline; minimum visible button height measured 44 px. Applying the stylesheet's reduced-motion media rules removes processing and specimen animations. Real screen-reader and physical microphone testing remain outside this check."
+  },
+  "responsive": {
+    "status": "pass",
+    "evidence": "Rendered analyzer inspected at 1440x1000, 390x844 and 320x800. All four routes tested at widths 320, 768 and 1024 without horizontal document overflow. Mobile navigation has visible labels. New analyzed signal scrolls result panel to 15.875 px from viewport top on 320 px viewport."
+  },
+  "contentStates": {
+    "loading": {"status": "pass", "evidence": "Actual Analyze and Evaluate clicks immediately set busy state and disable repeated submissions. Analyze shows Обработка… and a processing description before the request resolves."},
+    "empty": {"status": "pass", "evidence": "Main instance has zero training/test recordings, untrained message, dash scores, empty charts and accuracy Не измерена. Screenshots show this actual state."},
+    "error": {"status": "pass", "evidence": "Selecting bad.txt produces a format-specific message with role alert; WAV/MP3 remains the recovery route. Integration tests also reject corrupt audio, silence, invalid sessions and duplicate files."},
+    "partial": {"status": "pass", "evidence": "On main untrained instance, a synthetic signal was analyzed in memory: waveform and spectrogram displayed, actual spectral centroid 653 Hz shown, class score remained a dash and no prediction was fabricated. Page was reloaded afterwards; no fixture was saved to main data."},
+    "success": {"status": "pass", "evidence": "Isolated port 8766 instance using test-output data: actual UI imports 8 synthetic train and 4 test files, trains, evaluates 4 test rows, then analyzes a new synthetic signal with playback, charts and class scores. This validates software transitions only, not real material accuracy."},
+    "permission": {"status": "pass", "evidence": "Browser getUserMedia was temporarily mocked to reject with NotAllowedError. Actual Record click showed the permission recovery message and re-enabled recording; original API restored. Physical recording with a real microphone is untested."}
+  },
+  "renderedEvidence": [
+    {"viewport": "1440x1000", "artifact": "desktop-1440.png", "observation": "Final dark analyzer on main instance: two-line headline, lime upload plane, wireframe specimen, empty signal panels and explicitly untrained model; no synthetic metrics."},
+    {"viewport": "390x844", "artifact": "mobile-390.jpg", "observation": "Mobile first viewport: intentional two-line headline, case marker, clear upload target and four labelled bottom navigation controls. No horizontal overflow."},
+    {"viewport": "320x800", "artifact": "mobile-320.jpg", "observation": "Narrow first viewport retains readable title, upload action and four navigation labels; document width equals viewport width."}
+  ],
+  "limitations": ["No real material recordings supplied; no measured material accuracy.", "Microphone permission denial is simulated; physical capture is untested.", "Lighthouse scores and structural checks do not measure aesthetic quality."]
+}

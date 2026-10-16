@@ -1,0 +1,78 @@
+﻿split,class,session_id,new_filename,source_filename,source_group,source_bytes,wav_bytes
+train,metal,manual_20261016,metal1.wav,Дом спорта 10.m4a,Дом спорта,23379,35576
+train,metal,manual_20261016,metal3.wav,Дом спорта 12.m4a,Дом спорта,30374,54692
+train,metal,manual_20261016,metal4.wav,Дом спорта 13.m4a,Дом спорта,33533,62884
+train,metal,manual_20261016,metal5.wav,Дом спорта 14.m4a,Дом спорта,35555,68344
+train,metal,manual_20261016,metal6.wav,Дом спорта 15.m4a,Дом спорта,56803,109304
+train,metal,manual_20261016,metal7.wav,Дом спорта 16.m4a,Дом спорта,23436,43768
+train,metal,manual_20261016,metal9.wav,Дом спорта 18.m4a,Дом спорта,25474,46500
+train,metal,manual_20261016,metal10.wav,Дом спорта 19.m4a,Дом спорта,25110,43768
+train,metal,manual_20261016,metal11.wav,Дом спорта 2.m4a,Дом спорта,28001,51960
+train,metal,manual_20261016,metal14.wav,Дом спорта 22.m4a,Дом спорта,22530,41038
+train,metal,manual_20261016,metal15.wav,Дом спорта 3.m4a,Дом спорта,26640,49230
+train,metal,manual_20261016,metal19.wav,Дом спорта 7.m4a,Дом спорта,26299,49230
+train,metal,manual_20261016,metal20.wav,Дом спорта 8.m4a,Дом спорта,21110,38308
+train,metal,manual_20261016,metal21.wav,Дом спорта 9.m4a,Дом спорта,23128,41038
+train,metal,manual_20261016,metal23.wav,улица Комарова 10.m4a,улица Комарова,36210,65614
+train,metal,manual_20261016,metal24.wav,улица Комарова 11.m4a,улица Комарова,27617,51960
+train,metal,manual_20261016,metal25.wav,улица Комарова 12.m4a,улица Комарова,37963,68344
+train,metal,manual_20261016,metal26.wav,улица Комарова 13.m4a,улица Комарова,29229,54692
+train,metal,manual_20261016,metal27.wav,улица Комарова 14.m4a,улица Комарова,25235,46500
+train,metal,manual_20261016,metal28.wav,улица Комарова 15.m4a,улица Комарова,24448,43768
+train,metal,manual_20261016,metal31.wav,улица Комарова 2.m4a,улица Комарова,39060,73806
+train,metal,manual_20261016,metal33.wav,улица Комарова 4.m4a,улица Комарова,32339,60152
+train,metal,manual_20261016,metal34.wav,улица Комарова 5.m4a,улица Комарова,25562,46500
+train,metal,manual_20261016,metal35.wav,улица Комарова 6.m4a,улица Комарова,27657,49230
+train,metal,manual_20261016,metal37.wav,улица Комарова 8.m4a,улица Комарова,40260,76536
+train,metal,manual_20261016,metal38.wav,улица Комарова 9.m4a,улица Комарова,21698,41038
+train,metal,manual_20261016,metal39.wav,улица Комарова.m4a,улица,41883,76536
+val,metal,manual_20261016,metal13.wav,Дом спорта 21.m4a,Дом спорта,23413,43768
+val,metal,manual_20261016,metal16.wav,Дом спорта 4.m4a,Дом спорта,26984,49230
+val,metal,manual_20261016,metal17.wav,Дом спорта 5.m4a,Дом спорта,27761,49230
+val,metal,manual_20261016,metal22.wav,Дом спорта.m4a,Дом,25026,46500
+val,metal,manual_20261016,metal30.wav,улица Комарова 17.m4a,улица Комарова,22932,43768
+val,metal,manual_20261016,metal36.wav,улица Комарова 7.m4a,улица Комарова,24874,46500
+test,metal,manual_20261016,metal2.wav,Дом спорта 11.m4a,Дом спорта,21483,38308
+test,metal,manual_20261016,metal8.wav,Дом спорта 17.m4a,Дом спорта,31576,57422
+test,metal,manual_20261016,metal12.wav,Дом спорта 20.m4a,Дом спорта,20694,38308
+test,metal,manual_20261016,metal18.wav,Дом спорта 6.m4a,Дом спорта,25369,46500
+test,metal,manual_20261016,metal29.wav,улица Комарова 16.m4a,улица Комарова,23460,43768
+test,metal,manual_20261016,metal32.wav,улица Комарова 3.m4a,улица Комарова,34395,65614
+train,wood,manual_20261016,wood1.wav,20261016_171421.aac,wood_manual,24752,63236
+train,wood,manual_20261016,wood3.wav,20261016_171439.aac,wood_manual,31033,79584
+train,wood,manual_20261016,wood4.wav,20261016_171443.aac,wood_manual,24424,62494
+train,wood,manual_20261016,wood6.wav,20261016_171508.aac,wood_manual,24947,63980
+train,wood,manual_20261016,wood7.wav,20261016_171513.aac,wood_manual,32925,84784
+train,wood,manual_20261016,wood10.wav,20261016_171539.aac,wood_manual,30469,78098
+train,wood,manual_20261016,wood11.wav,20261016_171544.aac,wood_manual,28158,72154
+train,wood,manual_20261016,wood12.wav,20261016_171557.aac,wood_manual,27764,71410
+train,wood,manual_20261016,wood14.wav,20261016_171606.aac,wood_manual,38677,99646
+train,wood,manual_20261016,wood16.wav,20261016_171622.aac,wood_manual,31521,81070
+train,wood,manual_20261016,wood17.wav,20261016_171626.aac,wood_manual,26022,66952
+train,wood,manual_20261016,wood18.wav,20261016_171632.aac,wood_manual,28285,72896
+train,wood,manual_20261016,wood19.wav,20261016_171642.aac,wood_manual,30391,78098
+train,wood,manual_20261016,wood21.wav,20261016_171705.aac,wood_manual,27449,69924
+train,wood,manual_20261016,wood23.wav,20261016_171722.aac,wood_manual,23240,59522
+train,wood,manual_20261016,wood24.wav,20261016_171727.aac,wood_manual,33493,86270
+train,wood,manual_20261016,wood25.wav,20261016_171732.aac,wood_manual,26382,67694
+train,wood,manual_20261016,wood26.wav,20261016_171747.aac,wood_manual,26442,67694
+train,wood,manual_20261016,wood27.wav,20261016_171751.aac,wood_manual,27565,70668
+train,wood,manual_20261016,wood31.wav,20261016_171809.aac,wood_manual,21267,54320
+train,wood,manual_20261016,wood32.wav,20261016_171825.aac,wood_manual,20661,52834
+train,wood,manual_20261016,wood34.wav,20261016_171833.aac,wood_manual,27535,70668
+train,wood,manual_20261016,wood35.wav,20261016_171837.aac,wood_manual,29751,76612
+train,wood,manual_20261016,wood36.wav,20261016_171842.aac,wood_manual,24618,63236
+train,wood,manual_20261016,wood37.wav,20261016_171845.aac,wood_manual,24668,63236
+train,wood,manual_20261016,wood38.wav,20261016_171856.aac,wood_manual,23254,59522
+val,wood,manual_20261016,wood2.wav,20261016_171432.aac,wood_manual,27872,71410
+val,wood,manual_20261016,wood9.wav,20261016_171533.aac,wood_manual,34915,89986
+val,wood,manual_20261016,wood15.wav,20261016_171618.aac,wood_manual,32385,83298
+val,wood,manual_20261016,wood20.wav,20261016_171701.aac,wood_manual,28436,72896
+val,wood,manual_20261016,wood28.wav,20261016_171755.aac,wood_manual,30353,78098
+val,wood,manual_20261016,wood29.wav,20261016_171800.aac,wood_manual,34776,89242
+test,wood,manual_20261016,wood5.wav,20261016_171448.aac,wood_manual,26652,68438
+test,wood,manual_20261016,wood8.wav,20261016_171529.aac,wood_manual,27241,69924
+test,wood,manual_20261016,wood13.wav,20261016_171601.aac,wood_manual,35835,92216
+test,wood,manual_20261016,wood22.wav,20261016_171710.aac,wood_manual,28109,72154
+test,wood,manual_20261016,wood30.wav,20261016_171805.aac,wood_manual,25873,66208
+test,wood,manual_20261016,wood33.wav,20261016_171829.aac,wood_manual,20398,52092
