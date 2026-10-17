@@ -24,7 +24,7 @@ def make_handler(experiment):
         def end_headers(self):
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Cache-Control", "no-store")
-            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
+            self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self' https://static.tildacdn.com; img-src 'self' data:; media-src 'self' blob: data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'")
             super().end_headers()
 
         def send(self, code, payload, mime="application/json; charset=utf-8"):
@@ -86,7 +86,7 @@ def make_handler(experiment):
                         filename = payload.get("filename", "")
                         if not isinstance(filename, str):
                             raise ExperimentError("Некорректное имя файла.")
-                        result = (experiment.analyze(raw, filename, payload.get("mode", "cascade")) if path == "/api/analyze" else
+                        result = (experiment.analyze(raw, filename, payload.get("mode", "cascade"), multiple=payload.get("multiple", False)) if path == "/api/analyze" else
                                   experiment.add(raw, filename, payload.get("split"), payload.get("label"), payload.get("session")))
                     elif path == "/api/train":
                         result = experiment.train(payload.get("stage", "both"))

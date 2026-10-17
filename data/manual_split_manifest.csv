@@ -1,43 +1,4 @@
 ﻿split,class,session_id,new_filename,source_filename,source_group,source_bytes,wav_bytes
-train,metal,manual_20261016,metal1.wav,Дом спорта 10.m4a,Дом спорта,23379,35576
-train,metal,manual_20261016,metal3.wav,Дом спорта 12.m4a,Дом спорта,30374,54692
-train,metal,manual_20261016,metal4.wav,Дом спорта 13.m4a,Дом спорта,33533,62884
-train,metal,manual_20261016,metal5.wav,Дом спорта 14.m4a,Дом спорта,35555,68344
-train,metal,manual_20261016,metal6.wav,Дом спорта 15.m4a,Дом спорта,56803,109304
-train,metal,manual_20261016,metal7.wav,Дом спорта 16.m4a,Дом спорта,23436,43768
-train,metal,manual_20261016,metal9.wav,Дом спорта 18.m4a,Дом спорта,25474,46500
-train,metal,manual_20261016,metal10.wav,Дом спорта 19.m4a,Дом спорта,25110,43768
-train,metal,manual_20261016,metal11.wav,Дом спорта 2.m4a,Дом спорта,28001,51960
-train,metal,manual_20261016,metal14.wav,Дом спорта 22.m4a,Дом спорта,22530,41038
-train,metal,manual_20261016,metal15.wav,Дом спорта 3.m4a,Дом спорта,26640,49230
-train,metal,manual_20261016,metal19.wav,Дом спорта 7.m4a,Дом спорта,26299,49230
-train,metal,manual_20261016,metal20.wav,Дом спорта 8.m4a,Дом спорта,21110,38308
-train,metal,manual_20261016,metal21.wav,Дом спорта 9.m4a,Дом спорта,23128,41038
-train,metal,manual_20261016,metal23.wav,улица Комарова 10.m4a,улица Комарова,36210,65614
-train,metal,manual_20261016,metal24.wav,улица Комарова 11.m4a,улица Комарова,27617,51960
-train,metal,manual_20261016,metal25.wav,улица Комарова 12.m4a,улица Комарова,37963,68344
-train,metal,manual_20261016,metal26.wav,улица Комарова 13.m4a,улица Комарова,29229,54692
-train,metal,manual_20261016,metal27.wav,улица Комарова 14.m4a,улица Комарова,25235,46500
-train,metal,manual_20261016,metal28.wav,улица Комарова 15.m4a,улица Комарова,24448,43768
-train,metal,manual_20261016,metal31.wav,улица Комарова 2.m4a,улица Комарова,39060,73806
-train,metal,manual_20261016,metal33.wav,улица Комарова 4.m4a,улица Комарова,32339,60152
-train,metal,manual_20261016,metal34.wav,улица Комарова 5.m4a,улица Комарова,25562,46500
-train,metal,manual_20261016,metal35.wav,улица Комарова 6.m4a,улица Комарова,27657,49230
-train,metal,manual_20261016,metal37.wav,улица Комарова 8.m4a,улица Комарова,40260,76536
-train,metal,manual_20261016,metal38.wav,улица Комарова 9.m4a,улица Комарова,21698,41038
-train,metal,manual_20261016,metal39.wav,улица Комарова.m4a,улица,41883,76536
-val,metal,manual_20261016,metal13.wav,Дом спорта 21.m4a,Дом спорта,23413,43768
-val,metal,manual_20261016,metal16.wav,Дом спорта 4.m4a,Дом спорта,26984,49230
-val,metal,manual_20261016,metal17.wav,Дом спорта 5.m4a,Дом спорта,27761,49230
-val,metal,manual_20261016,metal22.wav,Дом спорта.m4a,Дом,25026,46500
-val,metal,manual_20261016,metal30.wav,улица Комарова 17.m4a,улица Комарова,22932,43768
-val,metal,manual_20261016,metal36.wav,улица Комарова 7.m4a,улица Комарова,24874,46500
-test,metal,manual_20261016,metal2.wav,Дом спорта 11.m4a,Дом спорта,21483,38308
-test,metal,manual_20261016,metal8.wav,Дом спорта 17.m4a,Дом спорта,31576,57422
-test,metal,manual_20261016,metal12.wav,Дом спорта 20.m4a,Дом спорта,20694,38308
-test,metal,manual_20261016,metal18.wav,Дом спорта 6.m4a,Дом спорта,25369,46500
-test,metal,manual_20261016,metal29.wav,улица Комарова 16.m4a,улица Комарова,23460,43768
-test,metal,manual_20261016,metal32.wav,улица Комарова 3.m4a,улица Комарова,34395,65614
 train,wood,manual_20261016,wood1.wav,20261016_171421.aac,wood_manual,24752,63236
 train,wood,manual_20261016,wood3.wav,20261016_171439.aac,wood_manual,31033,79584
 train,wood,manual_20261016,wood4.wav,20261016_171443.aac,wood_manual,24424,62494
@@ -76,3 +37,45 @@ test,wood,manual_20261016,wood13.wav,20261016_171601.aac,wood_manual,35835,92216
 test,wood,manual_20261016,wood22.wav,20261016_171710.aac,wood_manual,28109,72154
 test,wood,manual_20261016,wood30.wav,20261016_171805.aac,wood_manual,25873,66208
 test,wood,manual_20261016,wood33.wav,20261016_171829.aac,wood_manual,20398,52092
+train,metal,manual_20261017_metal_v2,metal_v2_01.wav,20261017_104431.aac,manual_20261017_metal_v2,20704,52834
+train,metal,manual_20261017_metal_v2,metal_v2_03.wav,20261017_104440.aac,manual_20261017_metal_v2,24675,63236
+train,metal,manual_20261017_metal_v2,metal_v2_04.wav,20261017_104445.aac,manual_20261017_metal_v2,28082,72154
+train,metal,manual_20261017_metal_v2,metal_v2_05.wav,20261017_104502.aac,manual_20261017_metal_v2,28094,72154
+train,metal,manual_20261017_metal_v2,metal_v2_06.wav,20261017_104535.aac,manual_20261017_metal_v2,21850,55806
+train,metal,manual_20261017_metal_v2,metal_v2_07.wav,20261017_104540.aac,manual_20261017_metal_v2,28110,72154
+train,metal,manual_20261017_metal_v2,metal_v2_09.wav,20261017_104548.aac,manual_20261017_metal_v2,19583,49862
+train,metal,manual_20261017_metal_v2,metal_v2_10.wav,20261017_104551.aac,manual_20261017_metal_v2,22178,56550
+train,metal,manual_20261017_metal_v2,metal_v2_11.wav,20261017_104600.aac,manual_20261017_metal_v2,26387,67694
+train,metal,manual_20261017_metal_v2,metal_v2_13.wav,20261017_104608.aac,manual_20261017_metal_v2,21248,54320
+train,metal,manual_20261017_metal_v2,metal_v2_14.wav,20261017_104611.aac,manual_20261017_metal_v2,22463,57292
+train,metal,manual_20261017_metal_v2,metal_v2_15.wav,20261017_104614.aac,manual_20261017_metal_v2,27543,70668
+train,metal,manual_20261017_metal_v2,metal_v2_19.wav,20261017_104657.aac,manual_20261017_metal_v2,24322,62494
+train,metal,manual_20261017_metal_v2,metal_v2_20.wav,20261017_104701.aac,manual_20261017_metal_v2,22746,58036
+train,metal,manual_20261017_metal_v2,metal_v2_21.wav,20261017_104704.aac,manual_20261017_metal_v2,27200,69924
+train,metal,manual_20261017_metal_v2,metal_v2_23.wav,20261017_104712.aac,manual_20261017_metal_v2,18977,48376
+train,metal,manual_20261017_metal_v2,metal_v2_24.wav,20261017_104716.aac,manual_20261017_metal_v2,24418,62494
+train,metal,manual_20261017_metal_v2,metal_v2_25.wav,20261017_104720.aac,manual_20261017_metal_v2,24081,61750
+train,metal,manual_20261017_metal_v2,metal_v2_26.wav,20261017_104725.aac,manual_20261017_metal_v2,22902,58778
+train,metal,manual_20261017_metal_v2,metal_v2_27.wav,20261017_104729.aac,manual_20261017_metal_v2,18078,46146
+train,metal,manual_20261017_metal_v2,metal_v2_28.wav,20261017_104732.aac,manual_20261017_metal_v2,22335,57292
+train,metal,manual_20261017_metal_v2,metal_v2_31.wav,20261017_104742.aac,manual_20261017_metal_v2,20756,52834
+train,metal,manual_20261017_metal_v2,metal_v2_33.wav,20261017_104802.aac,manual_20261017_metal_v2,25818,66208
+train,metal,manual_20261017_metal_v2,metal_v2_35.wav,20261017_104810.aac,manual_20261017_metal_v2,20639,52834
+train,metal,manual_20261017_metal_v2,metal_v2_36.wav,20261017_104813.aac,manual_20261017_metal_v2,20030,51348
+train,metal,manual_20261017_metal_v2,metal_v2_38.wav,20261017_105108.aac,manual_20261017_metal_v2,22960,58778
+train,metal,manual_20261017_metal_v2,metal_v2_39.wav,20261017_105112.aac,manual_20261017_metal_v2,23812,61008
+train,metal,manual_20261017_metal_v2,metal_v2_40.wav,20261017_105124.aac,manual_20261017_metal_v2,31878,81812
+val,metal,manual_20261017_metal_v2,metal_v2_16.wav,20261017_104618.aac,manual_20261017_metal_v2,18412,46890
+val,metal,manual_20261017_metal_v2,metal_v2_17.wav,20261017_104625.aac,manual_20261017_metal_v2,19622,49862
+val,metal,manual_20261017_metal_v2,metal_v2_22.wav,20261017_104708.aac,manual_20261017_metal_v2,24970,63980
+val,metal,manual_20261017_metal_v2,metal_v2_30.wav,20261017_104739.aac,manual_20261017_metal_v2,17266,43918
+val,metal,manual_20261017_metal_v2,metal_v2_34.wav,20261017_104806.aac,manual_20261017_metal_v2,21277,54320
+val,metal,manual_20261017_metal_v2,metal_v2_37.wav,20261017_105104.aac,manual_20261017_metal_v2,23585,60264
+test,metal,manual_20261017_metal_v2,metal_v2_02.wav,20261017_104436.aac,manual_20261017_metal_v2,21918,55806
+test,metal,manual_20261017_metal_v2,metal_v2_08.wav,20261017_104544.aac,manual_20261017_metal_v2,22705,58036
+test,metal,manual_20261017_metal_v2,metal_v2_12.wav,20261017_104604.aac,manual_20261017_metal_v2,24113,61750
+test,metal,manual_20261017_metal_v2,metal_v2_18.wav,20261017_104654.aac,manual_20261017_metal_v2,20083,51348
+test,metal,manual_20261017_metal_v2,metal_v2_29.wav,20261017_104735.aac,manual_20261017_metal_v2,21812,55806
+test,metal,manual_20261017_metal_v2,metal_v2_32.wav,20261017_104745.aac,manual_20261017_metal_v2,21270,54320
+test,metal,manual_20261016_metal_v1,metal_v1_01.wav,Дом спорта.m4a,metal_manual,25026,46500
+test,metal,manual_20261016_metal_v1,metal_v1_02.wav,Дом спорта 2.m4a,metal_manual,28001,51960

@@ -27,6 +27,10 @@ data/*/other/*
 !data/*/metal/manual_20261016/
 !data/*/wood/manual_20261016/
 !data/*/other/realised_background/
+!data/*/metal/manual_20261017_metal_v2/
+!data/*/metal/manual_20261017_metal_v2/*.wav
+!data/*/metal/manual_20261016_metal_v1/
+!data/*/metal/manual_20261016_metal_v1/*.wav
 artifacts/*
 !artifacts/.gitkeep
 !artifacts/model.json

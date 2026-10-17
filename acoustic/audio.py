@@ -12,6 +12,7 @@ os.environ.setdefault("NUMBA_CACHE_DIR", str(_cache))
 import librosa
 import numpy as np
 import soundfile as sf
+from scipy.signal import find_peaks
 
 SAMPLE_RATE = 16000
 DURATION = 2.0
@@ -158,6 +159,52 @@ def process(raw: bytes, filename: str, *, allow_unsuitable: bool = False,
                      "denoising": "light_spectral_3.7db_max",
                      "centroid_hz": round(float(matrices[1][:, active].mean())),
                      "onset_seconds": round(start / SAMPLE_RATE, 3)}}
+
+
+def split_impacts(raw: bytes, filename: str) -> list[dict]:
+    """Separate clearly spaced impacts, retaining their original amplitude and timing."""
+    # Share the same format, size, duration and numerical validation as single mode.
+    checked = process(raw, filename, allow_unsuitable=True)
+    if checked["rejection"] and checked["rejection"]["code"] == "silence":
+        return []
+    samples, rate = sf.read(io.BytesIO(raw), dtype="float32", always_2d=True)
+    y = samples.mean(axis=1)
+    y -= y.mean()
+    y = librosa.resample(y, orig_sr=rate, target_sr=SAMPLE_RATE)
+    hop = 80
+    envelope = librosa.feature.rms(y=y, frame_length=320, hop_length=hop)[0]
+    floor = float(np.percentile(envelope, 25))
+    maximum = float(envelope.max())
+    # Pad so impacts at either edge can also be peaks. A 250 ms refractory
+    # period suppresses repeated peaks from a single resonating strike.
+    peaks, _ = find_peaks(np.r_[0, envelope, 0],
+                          height=max(0.001, floor * 5, maximum * 0.08),
+                          prominence=max(floor * 3, maximum * 0.06),
+                          distance=round(0.25 * SAMPLE_RATE / hop))
+    peaks = peaks - 1
+    starts = []
+    for peak in peaks:
+        onset = int(peak)
+        threshold = max(floor * 2, float(envelope[peak]) * 0.15)
+        lower = max(0, int(peak) - round(0.12 * SAMPLE_RATE / hop))
+        while onset > lower and envelope[onset - 1] > threshold:
+            onset -= 1
+        starts.append(onset * hop)
+    impacts = []
+    for index, onset in enumerate(starts):
+        start = max(0, onset - round(0.08 * SAMPLE_RATE))
+        end = min(len(y), start + round(DURATION * SAMPLE_RATE))
+        if index + 1 < len(starts):
+            end = min(end, max(onset + 1, starts[index + 1] - round(0.04 * SAMPLE_RATE)))
+        segment = y[start:end]
+        segment = librosa.util.fix_length(segment, size=max(len(segment), round(0.15 * SAMPLE_RATE)))
+        output = io.BytesIO()
+        sf.write(output, segment, SAMPLE_RATE, format="WAV", subtype="FLOAT")
+        impacts.append({"audio": output.getvalue(), "number": index + 1,
+                        "time_seconds": round(onset / SAMPLE_RATE, 3),
+                        "start_seconds": round(start / SAMPLE_RATE, 3),
+                        "end_seconds": round(end / SAMPLE_RATE, 3)})
+    return impacts
 
 
 def playback(samples: np.ndarray) -> bytes:

@@ -1,7 +1,9 @@
 {
   "file_split_sessions": [
     "manual_20261016",
-    "realised_background"
+    "manual_20261017_metal_v2",
+    "realised_background",
+    "manual_20261016_metal_v1"
   ],
   "description": "User-requested file-level 70/15/15 partition of manual recordings. Preserve original session ID and warn about shared recording conditions; duplicate audio remains forbidden."
 }

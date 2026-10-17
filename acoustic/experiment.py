@@ -12,7 +12,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, balanced_accuracy_score, confusion_matrix, f1_score
 from sklearn.preprocessing import StandardScaler
 
-from .audio import ExperimentError, PIPELINE_VERSION, TRAINING_AUGMENTATION, process, playback
+from .audio import ExperimentError, PIPELINE_VERSION, TRAINING_AUGMENTATION, process, playback, split_impacts
 
 CLASSES = ["metal", "wood"]  # sklearn sorted binary class order
 DATA_CLASSES = [*CLASSES, "other"]
@@ -239,8 +239,17 @@ class Experiment:
             prediction = max(scores, key=scores.get)
         return gate, prediction, scores
 
-    def analyze(self, raw, filename, mode="cascade"):
+    def analyze(self, raw, filename, mode="cascade", multiple=False):
         self.validate_mode(mode)
+        if not isinstance(multiple, bool):
+            raise ExperimentError("Параметр multiple должен быть логическим значением.")
+        if multiple:
+            impacts = []
+            for impact in split_impacts(raw, filename):
+                result = self.analyze(impact.pop("audio"), "impact.wav", mode)
+                result["impact"] = impact
+                impacts.append(result)
+            return {"mode": mode, "multiple": True, "impacts": impacts}
         audio = process(raw, filename, allow_unsuitable=True)
         state = self.state()
         gate, prediction, scores = self.decide(audio, state, mode)

@@ -1,17 +1,17 @@
 {
-  "created": "2026-10-16T20:30:21.301274+00:00",
+  "created": "2026-10-17T09:12:53.259282+00:00",
   "mode": "cascade",
-  "model_id": "c2c95c3fded4",
-  "gate_id": "a9970aac03de",
-  "test_signature": "075ee059571f4bcea46a03acb07b31e94f4510f57416b18b14cb070a3942b9d8",
-  "n_test": 24,
-  "accuracy": 1.0,
-  "balanced_accuracy": 1.0,
-  "macro_f1": 1.0,
-  "majority_baseline": 0.5,
+  "model_id": "64c553a219c6",
+  "gate_id": "9cfb268655b2",
+  "test_signature": "250f41bd814b7482f6ef46afa4e77c6fd432982e151372262f1ceacc47d44a70",
+  "n_test": 28,
+  "accuracy": 0.9285714285714286,
+  "balanced_accuracy": 0.9153439153439153,
+  "macro_f1": 0.9194397759103641,
+  "majority_baseline": 0.42857142857142855,
   "wilson95": [
-    0.8620194241710247,
-    1.0
+    0.7735426157408214,
+    0.9801883525522292
   ],
   "labels": [
     "metal",
@@ -22,11 +22,11 @@
     [
       6,
       0,
-      0
+      1
     ],
     [
-      0,
-      6,
+      1,
+      8,
       0
     ],
     [
@@ -37,46 +37,56 @@
   ],
   "sessions": [
     "manual_20261016",
-    "realised_background"
+    "manual_20261016_metal_v1",
+    "manual_20261017_metal_v2",
+    "realised_background",
+    "s02"
   ],
   "examples": [
     {
-      "path": "test/metal/manual_20261016/metal12.wav",
+      "path": "test/metal/manual_20261016_metal_v1/metal_v1_02.wav",
+      "actual": "metal",
+      "predicted": "other",
+      "gate_status": "rejected",
+      "correct": false
+    },
+    {
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_02.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
       "correct": true
     },
     {
-      "path": "test/metal/manual_20261016/metal18.wav",
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_08.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
       "correct": true
     },
     {
-      "path": "test/metal/manual_20261016/metal2.wav",
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_12.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
       "correct": true
     },
     {
-      "path": "test/metal/manual_20261016/metal29.wav",
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_18.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
       "correct": true
     },
     {
-      "path": "test/metal/manual_20261016/metal32.wav",
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_29.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
       "correct": true
     },
     {
-      "path": "test/metal/manual_20261016/metal8.wav",
+      "path": "test/metal/manual_20261017_metal_v2/metal_v2_32.wav",
       "actual": "metal",
       "predicted": "metal",
       "gate_status": "accepted",
@@ -123,6 +133,27 @@
       "predicted": "wood",
       "gate_status": "accepted",
       "correct": true
+    },
+    {
+      "path": "test/wood/s02/19dbad0bf28d8289.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "gate_status": "accepted",
+      "correct": true
+    },
+    {
+      "path": "test/wood/s02/658bddb63bd23d7e.wav",
+      "actual": "wood",
+      "predicted": "wood",
+      "gate_status": "accepted",
+      "correct": true
+    },
+    {
+      "path": "test/wood/s02/8c78ea57dc284332.wav",
+      "actual": "wood",
+      "predicted": "metal",
+      "gate_status": "accepted",
+      "correct": false
     },
     {
       "path": "test/other/realised_background/spe_136_00_00_0.wav",
@@ -211,22 +242,25 @@
   ],
   "warnings": [
     "Сессия manual_20261016: разбиение по файлам; train, val и test не являются независимыми сессиями.",
+    "Сессия manual_20261017_metal_v2: разбиение по файлам; train, val и test не являются независимыми сессиями.",
     "Сессия realised_background: разбиение по файлам; train, val и test не являются независимыми сессиями."
   ],
   "file_split_sessions": [
     "manual_20261016",
+    "manual_20261016_metal_v1",
+    "manual_20261017_metal_v2",
     "realised_background"
   ],
   "gate": {
-    "accuracy": 1.0,
+    "accuracy": 0.9642857142857143,
     "labels": [
       "knock",
       "other"
     ],
     "confusion": [
       [
-        12,
-        0
+        15,
+        1
       ],
       [
         0,
@@ -235,14 +269,14 @@
     ],
     "false_accepts": 0,
     "n_other": 12,
-    "false_rejects": 0,
-    "n_knocks": 12,
+    "false_rejects": 1,
+    "n_knocks": 16,
     "false_accept_rate": 0.0,
-    "knock_recall": 1.0
+    "knock_recall": 0.9375
   },
   "material_accepted": {
-    "n_test": 12,
-    "coverage": 1.0,
-    "accuracy": 1.0
+    "n_test": 15,
+    "coverage": 0.9375,
+    "accuracy": 0.9333333333333333
   }
 }

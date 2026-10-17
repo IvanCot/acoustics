@@ -3,15 +3,13 @@ const $ = (id) => document.getElementById(id);
 const materials = ["wood", "metal"];
 const labels = {wood: "Дерево", metal: "Металл", other: "Неподходящий звук", knock: "Стук"};
 const analysisMode = () => document.querySelector('input[name="analysis-mode"]:checked').value;
-const splitLabels = {train: "Обучение", val: "Валидация", test: "Проверка", demo: "Вне оценки"};
 const headings = {
-  analyze: ["Звук как улика.", "Дерево или металл? Определите материал по короткому стуку."],
+  analyze: ["Дерево или металл?", "Определите материал по звуку удара."],
   dataset: ["Данные и обучение", "Собственные записи, независимые сессии и прозрачное обучение."],
-  quality: ["Проверка качества", "Точность, ошибки и условия, в которых работает классификатор."],
-  protocol: ["Руководство", "Как записывать звуки, обучать модели и оценивать результат."]
+  quality: ["Проверка качества", "Точность, ошибки и условия, в которых работает классификатор."]
 };
 let state = null, selectedFile = null, lastResult = null, isBusy = false, recording = null, recordingPending = false;
-let batch = [], batchMode = null, activeBatchIndex = -1;
+let batch = [], batchMode = null, activeBatchIndex = -1, activeHitIndex = 0;
 let playbackUrl = null;
 const escapeHTML = (value) => String(value).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pct = (value) => (100 * value).toLocaleString("ru-RU", {maximumFractionDigits: 1}) + "%";
@@ -29,7 +27,7 @@ function navigate() {
     el.setAttribute("aria-label", el.textContent.replace("↗", "").trim());
   });
   if (page === "analyze") {
-    $("page-title").replaceChildren(...["Звук как ", "улика."].map(text => {const line = document.createElement("span"); line.textContent = text; return line;}));
+    $("page-title").replaceChildren(...["Дерево или ", "металл?"].map(text => {const line = document.createElement("span"); line.textContent = text; return line;}));
   } else $("page-title").textContent = headings[page][0];
   $("page-title").setAttribute("aria-label", headings[page][0]);
   document.body.dataset.page = page;
@@ -86,7 +84,11 @@ function updateButtons() {
   $("record-btn").disabled = isBusy || recordingPending;
   for (const id of ["save-data-btn", "refresh-data", "audio-file", "dataset-files", "dataset-class", "dataset-split", "dataset-session", "evaluation-mode"]) $(id).disabled = locked;
   document.querySelectorAll('input[name="analysis-mode"]').forEach(input => {input.disabled = locked;});
-  document.querySelectorAll("[data-batch-index]").forEach(button => {button.disabled = locked || !batch[Number(button.dataset.batchIndex)]?.result;});
+  $("multiple-impacts").disabled = locked;
+  document.querySelectorAll("[data-batch-index]").forEach(button => {
+    const result = batch[Number(button.dataset.batchIndex)]?.result;
+    button.disabled = locked || !result || result.impacts?.length === 0;
+  });
 }
 
 async function refresh() {
@@ -96,21 +98,31 @@ async function refresh() {
 
 function renderState() {
   const counts = state.counts;
-  $("train-count").textContent = counts.train.wood + counts.train.metal + counts.train.other;
-  $("test-count").textContent = counts.test.wood + counts.test.metal + counts.test.other;
-  $("accuracy-summary").textContent = state.report ? pct(state.report.accuracy) : "Не измерена";
+  const modelSummary = (title, model, featureCount, kind) => {
+    const features = model?.n_features ?? featureCount;
+    const training = model?.n_train;
+    const fitted = model?.n_fit ?? training;
+    return `<section class="model-summary-item"><h3>${title}</h3><p>${kind} · ${features ? `${features} признаков` : "признаки: нет данных"}</p><p>Обучение: ${training ?? "—"} исходных записей · ${fitted ?? "—"} после аугментации</p></section>`;
+  };
+  $("model-summary").innerHTML = [
+    modelSummary("Детектор стука", state.gate_model, 42, "LogReg · спектральные и временные"),
+    modelSummary("Классификатор материала", state.model, 39, "LogReg · MFCC и спектральные")
+  ].join("");
   const fitCount = (model) => model?.n_fit && model.n_fit > model.n_train
     ? ` · ${model.n_fit} примеров с аугментацией` : "";
-  $("data-summary").innerHTML = Object.keys(splitLabels).map(split => {
-    const recordings = counts[split].wood + counts[split].metal + counts[split].other;
-    const trainingDetails = split === "train" && state.model && state.gate_model
-      ? `<br>Исходных записей: ${recordings}<br>Материал: ${state.model.n_fit ?? state.model.n_train} · Детектор: ${state.gate_model.n_fit ?? state.gate_model.n_train} примеров`
-      : "";
-    const count = split === "train" && state.model && state.gate_model
-      ? (state.model.n_fit ?? recordings) + (state.gate_model.n_fit ?? recordings) : recordings;
-    const badge = split === "train" && state.model && state.gate_model ? "ПРИМЕРОВ МОДЕЛЕЙ" : split.toUpperCase();
-    return `<div class="data-stat"><h2>${splitLabels[split]} <span class="micro-label">${badge}</span></h2><div class="count">${count}</div><small>Дерево: ${counts[split].wood} · Металл: ${counts[split].metal}<br>Неподходящие: ${counts[split].other}${trainingDetails}</small></div>`;
-  }).join("");
+  const trainingRecordings = counts.train.wood + counts.train.metal + counts.train.other;
+  const testCounts = ["val", "test"].reduce((total, split) => ({
+    wood: total.wood + counts[split].wood,
+    metal: total.metal + counts[split].metal,
+    other: total.other + counts[split].other
+  }), {wood: 0, metal: 0, other: 0});
+  const testRecordings = testCounts.wood + testCounts.metal + testCounts.other;
+  const augmentationDetails = state.model && state.gate_model
+    ? `<br>После аугментации: материал ${state.model.n_fit ?? state.model.n_train} · детектор ${state.gate_model.n_fit ?? state.gate_model.n_train}`
+    : "";
+  $("data-summary").innerHTML = `
+    <div class="data-stat"><h2>Обучение</h2><div class="count">${trainingRecordings}</div><small>Дерево: ${counts.train.wood} · Металл: ${counts.train.metal}<br>Неподходящие: ${counts.train.other}${augmentationDetails}</small></div>
+    <div class="data-stat"><h2>Тест</h2><div class="count">${testRecordings}</div><small>Валидация + тест<br>Дерево: ${testCounts.wood} · Металл: ${testCounts.metal} · Неподходящие: ${testCounts.other}</small></div>`;
   $("training-status").textContent = `01 · Детектор: ${state.gate_trained ? "готов · " + state.gate_model.n_train + " записей" + fitCount(state.gate_model) : "нужны обучение и корректные данные"}\n02 · Материал: ${state.material_trained ? "готов · " + state.model.n_train + " стуков" + fitCount(state.model) : "нужны обучение и корректные данные"}`;
   const issues = [...state.issues, ...state.errors.map(e => `${e.path}: ${e.error}`)];
   $("data-issues").innerHTML = issues.length ? `<div class="notice"><strong>Исправьте данные перед обучением</strong><ul>${issues.map(e => `<li>${escapeHTML(e)}</li>`).join("")}</ul></div>` : "";
@@ -157,7 +169,7 @@ function renderStages(result) {
   const status = gate?.status || (analysisMode() === "material" ? "skipped" : "waiting");
   $("gate-stage").dataset.status = status;
   $("gate-status").textContent = ({waiting: "Ожидает запись", skipped: "Пропущен", not_trained: "Не обучен", accepted: "Стук принят", rejected: "Запись отклонена"})[status];
-  $("gate-score").textContent = gate?.scores ? `Балл «стук»: ${pct(gate.scores.knock)} · порог ${pct(gate.threshold)}` : status === "skipped" ? "Выбран прямой прогноз материала" : gate?.reason || "Детектор не запускался";
+  $("gate-score").textContent = gate?.scores ? `${status === "accepted" ? "Похоже на стук" : "Не похоже на стук"} · оценка класса «стук»: ${pct(gate.scores.knock)}` : status === "skipped" ? "Выбран прямой прогноз материала" : gate?.reason || "Детектор не запускался";
   $("material-stage").dataset.status = result?.prediction ? "accepted" : "waiting";
   $("material-status").textContent = result?.prediction ? labels[result.prediction] : result ? (gate?.status === "rejected" || gate?.status === "not_trained" ? "Не запускалась" : "Не обучена") : "Ожидает анализ";
 }
@@ -193,6 +205,7 @@ function batchResultText(row) {
   if (row.error) return row.error;
   const result = row.result;
   if (!result) return "—";
+  if (result.impacts) return result.impacts.length ? `Найдено ударов: ${result.impacts.length}` : "Отдельные удары не найдены";
   if (result.prediction) return labels[result.prediction];
   if (result.gate.status === "rejected") return ({silence: "Тишина", clipping: "Перегрузка записи"})[result.gate.code] || "Неподходящий звук";
   return result.gate.status === "not_trained" ? "Детектор не обучен" : "Модель материала не обучена";
@@ -210,15 +223,19 @@ function renderBatch() {
   const statuses = {queued: "В очереди", processing: "Обработка…", done: "Готово", error: "Ошибка"};
   const previousScroller = $("batch-table").querySelector(".table-scroller");
   const scrollTop = previousScroller?.scrollTop || 0, scrollLeft = previousScroller?.scrollLeft || 0;
-  $("batch-table").innerHTML = `<div class="table-scroller"><table class="batch-table"><thead><tr><th scope="col">Файл</th><th scope="col">Статус</th><th scope="col">Результат</th><th scope="col">Подробнее</th></tr></thead><tbody>${batch.map((row, index) => `<tr data-status="${row.status}" class="${index === activeBatchIndex ? "selected" : ""}"><td class="batch-name">${escapeHTML(row.file.name)}</td><td>${statuses[row.status]}</td><td><strong>${escapeHTML(batchResultText(row))}</strong>${row.result?.gate.status === "rejected" ? `<small>${escapeHTML(row.result.gate.reason)}</small>` : ""}${row.result?.warnings.length ? `<small>${escapeHTML(row.result.warnings.join(" "))}</small>` : ""}</td><td><button class="button quiet" type="button" data-batch-index="${index}" aria-pressed="${index === activeBatchIndex}" aria-label="Показать результат: ${escapeHTML(row.file.name)}" ${isBusy || !row.result ? "disabled" : ""}>Показать</button></td></tr>`).join("")}</tbody></table></div>`;
+  const hitRows = (row, index) => (row.result?.impacts || []).map((hit, hitIndex) => `<tr class="impact-row ${index === activeBatchIndex && hitIndex === activeHitIndex ? "selected" : ""}"><td>↳ Удар ${hitIndex + 1} · ${hit.impact.time_seconds.toLocaleString("ru-RU", {minimumFractionDigits: 2})} с</td><td>Готово</td><td><strong>${escapeHTML(batchResultText({result: hit}))}</strong>${hit.prediction ? `<small>${pct(hit.scores[hit.prediction])}</small>` : ""}</td><td><button class="button quiet" type="button" data-batch-index="${index}" data-hit-index="${hitIndex}" aria-pressed="${index === activeBatchIndex && hitIndex === activeHitIndex}" ${isBusy ? "disabled" : ""}>Показать</button></td></tr>`).join("");
+  $("batch-table").innerHTML = `<div class="table-scroller"><table class="batch-table"><thead><tr><th scope="col">Файл</th><th scope="col">Статус</th><th scope="col">Результат</th><th scope="col">Подробнее</th></tr></thead><tbody>${batch.map((row, index) => `<tr data-status="${row.status}" class="${index === activeBatchIndex && !row.result?.impacts ? "selected" : ""}"><td class="batch-name">${escapeHTML(row.file.name)}</td><td>${statuses[row.status]}</td><td><strong>${escapeHTML(batchResultText(row))}</strong>${row.result?.gate?.status === "rejected" ? `<small>${escapeHTML(row.result.gate.reason)}</small>` : ""}${row.result?.warnings?.length ? `<small>${escapeHTML(row.result.warnings.join(" "))}</small>` : ""}</td><td><button class="button quiet" type="button" data-batch-index="${index}" aria-pressed="${index === activeBatchIndex && !row.result?.impacts}" aria-label="Показать результат: ${escapeHTML(row.file.name)}" ${isBusy || !row.result || row.result.impacts?.length === 0 ? "disabled" : ""}>Показать</button></td></tr>${hitRows(row, index)}`).join("")}</tbody></table></div>`;
   const scroller = $("batch-table").querySelector(".table-scroller");
   scroller.scrollTop = scrollTop; scroller.scrollLeft = scrollLeft;
 }
 
 function highlightBatchResult() {
-  $("batch-table").querySelectorAll("tbody tr").forEach((row, index) => {
-    row.classList.toggle("selected", index === activeBatchIndex);
-    row.querySelector("button").setAttribute("aria-pressed", String(index === activeBatchIndex));
+  $("batch-table").querySelectorAll("[data-batch-index]").forEach(button => {
+    const index = Number(button.dataset.batchIndex);
+    const isFileSummary = batch[index]?.result?.impacts && !button.hasAttribute("data-hit-index");
+    const selected = !isFileSummary && index === activeBatchIndex && Number(button.dataset.hitIndex || 0) === activeHitIndex;
+    button.closest("tr").classList.toggle("selected", selected);
+    button.setAttribute("aria-pressed", String(selected));
   });
 }
 
@@ -248,9 +265,9 @@ async function analyze() {
         try {
           if (!/\.(wav|mp3)$/i.test(row.file.name)) throw new Error("Поддерживаются только WAV и MP3.");
           if (!row.file.size || row.file.size > 12 * 1024 * 1024) throw new Error("Нужен непустой файл размером до 12 МБ.");
-          row.result = await api("/api/analyze", {...await encodeFile(row.file), mode: batchMode});
+          row.result = await api("/api/analyze", {...await encodeFile(row.file), mode: batchMode, multiple: $("multiple-impacts").checked});
           row.status = "done";
-          if (activeBatchIndex === -1) showBatchResult(index);
+          if (activeBatchIndex === -1 && (!row.result.impacts || row.result.impacts.length)) showBatchResult(index);
         } catch (error) {
           row.status = "error";
           row.error = error.message || "Не удалось обработать запись.";
@@ -265,14 +282,16 @@ async function analyze() {
   });
 }
 
-function showBatchResult(index) {
+function showBatchResult(index, hitIndex = 0) {
   const row = batch[index];
   if (!row?.result) return;
-  activeBatchIndex = index;
+  const result = row.result.impacts ? row.result.impacts[hitIndex] : row.result;
+  if (!result) return;
+  activeBatchIndex = index; activeHitIndex = hitIndex;
   selectedFile = row.file;
-  lastResult = row.result;
+  lastResult = result;
   resetResult();
-  $("result-file").textContent = row.file.name;
+  $("result-file").textContent = row.file.name + (lastResult.impact ? ` · удар ${lastResult.impact.number} · ${lastResult.impact.time_seconds.toLocaleString("ru-RU")} с` : "");
   $("result-file").hidden = false;
   $("wave-empty").hidden = true;
   $("spectrum-empty").hidden = true;
@@ -288,6 +307,7 @@ function showBatchResult(index) {
     document.querySelector(".result-panel").dataset.material = lastResult.prediction;
     const score = lastResult.scores[lastResult.prediction];
     $("result-kicker").textContent = "ПРЕДПОЛАГАЕМЫЙ МАТЕРИАЛ";
+    $("result-dot").style.background = `var(--${lastResult.prediction})`;
     $("result-title").textContent = labels[lastResult.prediction];
     $("result-description").textContent = score < 0.65 ? "Баллы классов близки. Вывод неустойчив — сравните с известным материалом и повторите запись." : "Модель выбрала этот класс среди двух известных. Сверьте результат с известным материалом.";
     for (const label of materials) {
@@ -347,30 +367,18 @@ function drawPlots() {
 }
 
 function renderReport() {
-  const validation = state.validation;
-  const panel = $("validation-summary");
-  panel.hidden = !validation;
-  if (validation) {
-    const selected = validation[validation.selected];
-    const clean = selected.clean;
-    const noisy = selected.noisy;
-    const baseline = validation.denoise.noisy;
-    panel.innerHTML = `<div class="panel-heading"><h2>Валидация · выбор обработки</h2><span class="tag">${clean.correct}/${clean.n} без добавленного шума</span></div><p>На ${noisy.n} валидационных записях с искусственным шумом (SNR 20 дБ): <strong>${noisy.correct}/${noisy.n}</strong> верно с аугментацией, ${baseline.correct}/${baseline.n} без неё.</p><p class="helper">Это сравнение на val для выбора обработки. Искусственно зашумлённые копии не являются реальными записями. Test оценивается отдельно кнопкой выше.</p>`;
-  }
   const report = state.report?.mode === $("evaluation-mode").value ? state.report : null;
   $("quality-empty").hidden = !!report;
   $("quality-results").hidden = !report;
   if (!report) return;
-  $("report-warnings").hidden = !report.warnings?.length;
-  $("report-warnings").textContent = (report.warnings || []).join(" ");
   const metrics = [[pct(report.accuracy), "Точность (accuracy)"], [pct(report.balanced_accuracy), "Сбалансированная точность"], [report.macro_f1.toFixed(3), "Macro F1"], [String(report.n_test), "Новых проверочных записей"]];
   $("metrics").innerHTML = metrics.map(([value, label]) => `<div class="metric"><div class="value">${escapeHTML(value)}</div><div class="label">${label}</div></div>`).join("");
   $("confusion").innerHTML = `<table class="confusion-table"><thead><tr><th scope="col">Факт ↓ / Прогноз →</th>${report.labels.map(l => `<th scope="col">${labels[l]}</th>`).join("")}</tr></thead><tbody>${report.confusion.map((row, i) => `<tr><th scope="row">${labels[report.labels[i]]}</th>${row.map((v,j) => `<td class="${i===j ? "diagonal" : ""}">${v}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-  $("report-passport").innerHTML = `<div class="report-meta"><p><strong>Режим:</strong> ${report.mode === "cascade" ? "Каскад 1 → 2, включая отказы" : "Только модель 2, только дерево и металл"}</p><p><strong>Материал:</strong> ${escapeHTML(report.model_id)}</p>${report.gate_id ? `<p><strong>Детектор:</strong> ${escapeHTML(report.gate_id)}</p>` : ""}<p><strong>Проверено:</strong> ${escapeHTML(prettyDate(report.created))}</p><p><strong>Сессии test:</strong> ${report.sessions.map(escapeHTML).join(", ")}</p><p><strong>95% интервал accuracy:</strong> ${pct(report.wilson95[0])} – ${pct(report.wilson95[1])}</p><p><strong>Базовый прогноз частого класса:</strong> ${pct(report.majority_baseline)}</p></div>`;
+  $("report-passport").innerHTML = `<div class="report-meta"><p><strong>Режим:</strong> ${report.mode === "cascade" ? "Каскад 1 → 2, включая отказы" : "Только модель 2, только дерево и металл"}</p><p><strong>Материал:</strong> ${escapeHTML(report.model_id)}</p>${report.gate_id ? `<p><strong>Детектор:</strong> ${escapeHTML(report.gate_id)}</p>` : ""}<p><strong>Проверено:</strong> ${escapeHTML(prettyDate(report.created))}</p><p><strong>Сессии test:</strong> ${report.sessions.map(escapeHTML).join(", ")}</p><p><strong>95% интервал accuracy:</strong> ${pct(report.wilson95[0])} – ${pct(report.wilson95[1])}</p></div>`;
   $("gate-report").hidden = !report.gate;
   if (report.gate) {
     const g = report.gate, m = report.material_accepted;
-    $("gate-report").innerHTML = `<h2>01 · Что пропускает детектор</h2><p>Принято настоящих стуков: ${g.n_knocks - g.false_rejects} из ${g.n_knocks} (${pct(g.knock_recall)}). Ошибочно пропущено неподходящих: ${g.false_accepts} из ${g.n_other} (${pct(g.false_accept_rate)}).</p><p>02 · Материал среди принятых настоящих стуков: ${m.accuracy === null ? "нет принятых стуков" : pct(m.accuracy) + " на " + m.n_test + " записях"}. Охват настоящих стуков: ${pct(m.coverage)}.</p><p class="helper">Точность выше считается по всему каскаду: отклонённый настоящий стук и пропущенная речь считаются ошибками. Высокая точность только среди принятых записей может скрывать частые отказы.</p>`;
+    $("gate-report").innerHTML = `<h2>01 · Что пропускает детектор</h2><p>Принято настоящих стуков: ${g.n_knocks - g.false_rejects} из ${g.n_knocks} (${pct(g.knock_recall)}). Ошибочно пропущено неподходящих: ${g.false_accepts} из ${g.n_other} (${pct(g.false_accept_rate)}).</p><p>02 · Материал среди принятых настоящих стуков: ${m.accuracy === null ? "нет принятых стуков" : pct(m.accuracy) + " на " + m.n_test + " записях"}. Охват настоящих стуков: ${pct(m.coverage)}.</p>`;
   }
   $("evaluation-table").innerHTML = table(["Файл", "Материал", "Прогноз", "Результат"], report.examples.map(r => [r.path, labels[r.actual], labels[r.predicted], r.correct ? "✓ Верно" : "✕ Ошибка"]));
 }
@@ -380,7 +388,7 @@ $("analyze-btn").addEventListener("click", analyze);
 $("batch-table").addEventListener("click", e => {
   const button = e.target.closest("button[data-batch-index]");
   if (!button || isBusy || recording || recordingPending) return;
-  showBatchResult(Number(button.dataset.batchIndex));
+  showBatchResult(Number(button.dataset.batchIndex), Number(button.dataset.hitIndex || 0));
   if (lastResult?.warnings.length) notify(lastResult.warnings.join(" "));
   else $("notice").hidden = true;
   if (innerWidth < 700) document.querySelector(".signal-panel").scrollIntoView({block: "start", behavior: "instant"});
@@ -494,3 +502,9 @@ window.addEventListener("resize", () => {clearTimeout(resizeTimer); resizeTimer 
 navigate();
 drawPlots();
 refresh().catch(() => notify("Нет связи с локальным сервером. Запустите server.py и обновите страницу."));
+
+$("multiple-impacts").addEventListener("change", () => {
+  $("file-limit").textContent = $("multiple-impacts").checked ? "Отдельные удары с паузами · до 10 секунд · до 12 МБ каждый" : "Один стук на файл · до 10 секунд · до 12 МБ каждый";
+  $("notice").hidden = true;
+  resetBatchResults();
+});

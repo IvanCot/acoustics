@@ -16,7 +16,7 @@ from urllib.request import Request, urlopen
 import numpy as np
 import soundfile as sf
 
-from acoustic.audio import ExperimentError, light_denoise, process, training_waveform
+from acoustic.audio import ExperimentError, light_denoise, process, training_waveform, split_impacts
 from acoustic.experiment import Experiment
 from server import make_handler
 
@@ -61,6 +61,44 @@ def background(seed=0, silent=False):
 
 
 class AudioTests(unittest.TestCase):
+    def test_split_spaced_impacts_preserves_timing_and_isolates_neighbours(self):
+        rate = 16000
+        y = np.zeros(rate * 4, dtype=np.float32)
+        for onset, frequency, amplitude in [(0.4, 500, .6), (1.5, 1400, .35), (2.8, 700, .5)]:
+            t = np.arange(int(.8 * rate)) / rate
+            hit = amplitude * np.cos(2 * np.pi * frequency * t) * np.exp(-t * 12)
+            start = round(onset * rate)
+            y[start:start + len(hit)] += hit
+        raw = io.BytesIO()
+        sf.write(raw, y, rate, format="WAV")
+        impacts = split_impacts(raw.getvalue(), "three.wav")
+        self.assertEqual(len(impacts), 3)
+        for index, (impact, onset) in enumerate(zip(impacts, [.4, 1.5, 2.8])):
+            self.assertAlmostEqual(impact["time_seconds"], onset, delta=.04)
+            self.assertLess(impact["start_seconds"], onset)
+            if index < 2:
+                self.assertLess(impact["end_seconds"], impacts[index + 1]["time_seconds"])
+            self.assertEqual(process(impact["audio"], "hit.wav")["info"]["features"], 39)
+
+    def test_split_silence_and_one_resonating_strike(self):
+        self.assertEqual(split_impacts(background(silent=True), "silence.wav"), [])
+        self.assertEqual(len(split_impacts(signal(), "single.wav")), 1)
+
+    def test_multiple_mode_uses_existing_models_without_training(self):
+        with_workspace = temporary_workspace()
+        try:
+            root = Path(with_workspace.name)
+            experiment = Experiment(root / "data", root / "artifacts")
+            for mode in ["material", "cascade"]:
+                result = experiment.analyze(signal(), "one.wav", mode, multiple=True)
+                self.assertEqual(len(result["impacts"]), 1)
+                self.assertEqual(result["impacts"][0]["mode"], mode)
+                self.assertEqual(result["impacts"][0]["impact"]["number"], 1)
+            self.assertEqual(experiment.analyze(background(silent=True), "quiet.wav", multiple=True)["impacts"], [])
+            self.assertFalse((root / "artifacts" / "model.json").exists())
+        finally:
+            with_workspace.cleanup()
+
     def test_light_denoiser_reduces_background_and_preserves_impact(self):
         rng = np.random.default_rng(42)
         y = rng.normal(0, .004, 32000).astype(np.float32)
