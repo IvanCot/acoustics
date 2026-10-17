@@ -4,9 +4,9 @@ const materials = ["wood", "metal"];
 const labels = {wood: "Дерево", metal: "Металл", other: "Неподходящий звук", knock: "Стук"};
 const analysisMode = () => document.querySelector('input[name="analysis-mode"]:checked').value;
 const headings = {
-  analyze: ["Дерево или металл?", "Определите материал по звуку удара."],
-  dataset: ["Данные и обучение", "Собственные записи, независимые сессии и прозрачное обучение."],
-  quality: ["Проверка качества", "Точность, ошибки и условия, в которых работает классификатор."]
+  analyze: "Дерево или металл?",
+  dataset: "Данные и обучение",
+  quality: "Проверка качества"
 };
 let state = null, selectedFile = null, lastResult = null, isBusy = false, recording = null, recordingPending = false;
 let batch = [], batchMode = null, activeBatchIndex = -1, activeHitIndex = 0;
@@ -30,10 +30,9 @@ function navigate() {
   });
   if (page === "analyze") {
     $("page-title").replaceChildren(...["Дерево или ", "металл?"].map(text => {const line = document.createElement("span"); line.textContent = text; return line;}));
-  } else $("page-title").textContent = headings[page][0];
-  $("page-title").setAttribute("aria-label", headings[page][0]);
+  } else $("page-title").textContent = headings[page];
+  $("page-title").setAttribute("aria-label", headings[page]);
   document.body.dataset.page = page;
-  $("page-description").textContent = headings[page][1];
   if (page === "analyze") requestAnimationFrame(drawPlots);
   window.scrollTo({top: 0, behavior: "instant"});
 }
@@ -98,8 +97,8 @@ async function refresh() {
   if (state.hosted_read_only) {
     document.querySelectorAll('.nav-item[data-page="dataset"], .nav-item[data-page="quality"]').forEach(item => {item.style.display = "none";});
     $("result-action").hidden = true;
-    document.querySelector(".next-steps").hidden = true;
-    document.querySelector(".local-card").innerHTML = `<span class="status-dot"></span><strong>Анализ на сервере</strong><p>Загруженные аудиозаписи передаются на сервер для обработки.</p>`;
+    document.querySelector(".local-card").hidden = false;
+    document.querySelector(".local-card").innerHTML = `<span class="status-dot"></span><strong>Серверный анализ</strong><p>Аудио отправляется на сервер.</p>`;
     document.querySelector(".sidebar-footer span").textContent = "ПУБЛИЧНЫЙ РЕЖИМ";
     state.report = null;
     state.validation = null;
@@ -114,14 +113,12 @@ function renderState() {
     const features = model?.n_features ?? featureCount;
     const training = model?.n_train;
     const fitted = model?.n_fit ?? training;
-    return `<section class="model-summary-item"><h3>${title}</h3><p>${kind} · ${features ? `${features} признаков` : "признаки: нет данных"}</p><p>Обучение: ${training ?? "—"} исходных записей · ${fitted ?? "—"} после аугментации</p></section>`;
+    return `<section class="model-summary-item"><h3>${title}</h3><p>${kind} · ${features ? `${features} признаков` : "признаки: нет данных"}</p><p>${training ?? "—"} исходных → ${fitted ?? training ?? "—"} с аугментацией</p></section>`;
   };
   $("model-summary").innerHTML = [
     modelSummary("Детектор стука", state.gate_model, 42, "LogReg · спектральные и временные"),
     modelSummary("Классификатор материала", state.model, 39, "LogReg · MFCC и спектральные")
   ].join("");
-  const fitCount = (model) => model?.n_fit && model.n_fit > model.n_train
-    ? ` · ${model.n_fit} примеров с аугментацией` : "";
   const trainingRecordings = counts.train.wood + counts.train.metal + counts.train.other;
   const augmentedTrainingExamples = state.gate_model?.n_fit ?? trainingRecordings * 3;
   const testCounts = ["val", "test"].reduce((total, split) => ({
@@ -130,16 +127,14 @@ function renderState() {
     other: total.other + counts[split].other
   }), {wood: 0, metal: 0, other: 0});
   const testRecordings = testCounts.wood + testCounts.metal + testCounts.other;
-  const augmentationDetails = state.model && state.gate_model
-    ? `<br>После аугментации: материал ${state.model.n_fit ?? state.model.n_train} · детектор ${state.gate_model.n_fit ?? state.gate_model.n_train}`
-    : "";
   $("data-summary").innerHTML = `
-    <div class="data-stat"><h2>Обучение</h2><div class="count">${augmentedTrainingExamples}</div><small>${trainingRecordings} исходных записей с учётом аугментации<br>Дерево: ${counts.train.wood} · Металл: ${counts.train.metal}<br>Неподходящие: ${counts.train.other}${augmentationDetails}</small></div>
-    <div class="data-stat"><h2>Тест</h2><div class="count">${testRecordings}</div><small>Валидация + тест<br>Дерево: ${testCounts.wood} · Металл: ${testCounts.metal} · Неподходящие: ${testCounts.other}</small></div>`;
-  $("training-status").textContent = `01 · Детектор: ${state.gate_trained ? "готов · " + state.gate_model.n_train + " записей" + fitCount(state.gate_model) : "нужны обучение и корректные данные"}\n02 · Материал: ${state.material_trained ? "готов · " + state.model.n_train + " стуков" + fitCount(state.model) : "нужны обучение и корректные данные"}`;
+    <div class="data-stat"><h2>Обучение</h2><div class="count">${augmentedTrainingExamples}</div><small>${trainingRecordings} исходных · дерево ${counts.train.wood} · металл ${counts.train.metal} · прочие ${counts.train.other}</small></div>
+    <div class="data-stat"><h2>Тест</h2><div class="count">${testRecordings}</div><small>Валидация + тест · дерево ${testCounts.wood} · металл ${testCounts.metal} · прочие ${testCounts.other}</small></div>`;
+  $("training-status").textContent = `Детектор: ${state.gate_trained ? "готов" : "не обучен"} · Материал: ${state.material_trained ? "готов" : "не обучен"}`;
   const issues = [...state.issues, ...state.errors.map(e => `${e.path}: ${e.error}`)];
   $("data-issues").innerHTML = issues.length ? `<div class="notice"><strong>Исправьте данные перед обучением</strong><ul>${issues.map(e => `<li>${escapeHTML(e)}</li>`).join("")}</ul></div>` : "";
-  if (state.warnings?.length) $("data-issues").innerHTML += `<div class="notice neutral">${state.warnings.map(escapeHTML).join("<br>")}</div>`;
+  const visibleWarnings = (state.warnings || []).filter(message => !message.includes("разбиение по файлам; train, val и test не являются независимыми сессиями"));
+  if (visibleWarnings.length) $("data-issues").innerHTML += `<div class="notice neutral">${visibleWarnings.map(escapeHTML).join("<br>")}</div>`;
   $("dataset-table").innerHTML = state.rows.length ? table(["Файл", "Тип записи", "Выборка", "Сессия"], state.rows.map(r => [r.path, labels[r.label], r.split, r.session])) : `<div class="empty-table">Пока нет записей. Добавьте свои WAV / MP3 через форму выше.<br>Тестовые звуки и результаты не подставляются автоматически.</div>`;
   if (!lastResult) resetResult();
   renderReport();
@@ -164,9 +159,8 @@ function resetResult() {
     if (playbackUrl) { URL.revokeObjectURL(playbackUrl); playbackUrl = null; }
   }
   const ready = analysisMode() === "material" ? state?.material_trained : state?.trained;
-  $("result-kicker").textContent = ready ? "ВЫБРАННЫЙ РЕЖИМ ГОТОВ" : "НУЖНО ОБУЧЕНИЕ";
   $("result-title").textContent = ready ? "Готов к приёму" : "Нет образцов";
-  $("result-description").textContent = ready ? "Выберите новый файл и запустите анализ. Проверяйте результат по известному материалу предмета." : "Добавьте примеры и обучите нужные модели. Для каскада нужны также неподходящие звуки: речь, музыка и шум.";
+  $("result-description").textContent = ready ? "Выберите файл и запустите анализ." : "Добавьте записи и обучите модели.";
   $("result-action").textContent = ready ? "Посмотреть проверку качества →" : "Добавить обучающие записи →";
   $("result-action").href = ready ? "#quality" : "#dataset";
   $("result-dot").style.background = ready ? "var(--green)" : "#afb8ac";
@@ -319,10 +313,9 @@ function showBatchResult(index, hitIndex = 0) {
   if (lastResult.prediction) {
     document.querySelector(".result-panel").dataset.material = lastResult.prediction;
     const score = lastResult.scores[lastResult.prediction];
-    $("result-kicker").textContent = "ПРЕДПОЛАГАЕМЫЙ МАТЕРИАЛ";
     $("result-dot").style.background = `var(--${lastResult.prediction})`;
     $("result-title").textContent = labels[lastResult.prediction];
-    $("result-description").textContent = score < 0.65 ? "Баллы классов близки. Вывод неустойчив — сравните с известным материалом и повторите запись." : "Модель выбрала этот класс среди двух известных. Сверьте результат с известным материалом.";
+    $("result-description").textContent = score < 0.65 ? "Оценки близки — повторите запись." : "Сверьте прогноз с предметом.";
     for (const label of materials) {
       $("score-" + label).textContent = pct(lastResult.scores[label]);
       $("bar-" + label).value = lastResult.scores[label];
@@ -332,7 +325,6 @@ function showBatchResult(index, hitIndex = 0) {
   } else {
     resetResult();
     const rejected = lastResult.gate.status === "rejected";
-    $("result-kicker").textContent = rejected ? "МАТЕРИАЛ НЕ ОПРЕДЕЛЯЛСЯ" : "НУЖНО ОБУЧЕНИЕ";
     $("result-title").textContent = rejected ? "Не подходит" : "Нужны примеры";
     $("result-description").textContent = rejected || lastResult.gate.status === "not_trained" ? lastResult.gate.reason : "Сигнал обработан. Обучите модель материала на записях дерева и металла.";
     $("result-dot").style.background = "var(--orange)";
@@ -439,7 +431,6 @@ for (const [id, stage] of [["train-btn", "both"], ["train-gate-btn", "gate"], ["
 }
 document.querySelectorAll('input[name="analysis-mode"]').forEach(input => input.addEventListener("change", () => {
   $("notice").hidden = true;
-  $("mode-description").textContent = analysisMode() === "material" ? "Модель 1 пропущена. Речь и шум могут получить метку дерева или металла. Проверка тишины и повреждений файла сохраняется." : "Модель 1 отсекает неподходящие звуки. Модель 2 получает только прошедшие проверку записи.";
   resetBatchResults();
 }));
 $("evaluation-mode").addEventListener("change", () => {renderReport(); updateButtons();});
