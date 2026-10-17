@@ -59,6 +59,8 @@ python server.py
 - `web/` — интерфейс приложения.
 - `data/{train,val,test,demo}/` — подготовленные записи.
 - `artifacts/` — сохранённые модели и отчёты.
+- `demo/` — готовые аудиопримеры для демонстрации.
+- [Презентация для жюри](akusticheskiy-detektiv_prezentaciya_algoritmy.pptx) — алгоритмы, признаки и модели.
 - `docs/RECORDING.md` — рекомендации по сбору данных.
 - `THIRD_PARTY.md` — источники, лицензии и подготовка сторонних записей.
 

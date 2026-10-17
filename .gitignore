@@ -2,8 +2,6 @@ __pycache__/
 *.pyc
 data/*
 !data/README.md
-!data/*README.txt
-!data/prepare_*.py
 !data/*_manifest.csv
 !data/split_policy.json
 !data/train/
@@ -31,17 +29,22 @@ data/*/other/*
 !data/*/metal/manual_20261017_metal_v2/*.wav
 !data/*/metal/manual_20261016_metal_v1/
 !data/*/metal/manual_20261016_metal_v1/*.wav
+!data/train/other/s01/
+!data/train/other/s01/ca3e6b4a4b4fcaba.mp3
+!data/train/wood/s01/
+!data/train/wood/s01/ea7e15183b44d2c0.mp3
+!data/test/wood/s02/
+!data/test/wood/s02/19dbad0bf28d8289.wav
+!data/test/wood/s02/658bddb63bd23d7e.wav
+!data/test/wood/s02/8c78ea57dc284332.wav
 artifacts/*
-!artifacts/.gitkeep
 !artifacts/model.json
 !artifacts/gate.json
 !artifacts/report.json
 !artifacts/validation.json
 !artifacts/gate-validation.json
 67_IronPlate/*
-!67_IronPlate/convert_to_wav.py
 ReaLISED_Dataset/*
-!ReaLISED_Dataset/select_materials.py
 RealImpact-main/
 test-output/
 *.log
@@ -58,3 +61,14 @@ Thumbs.db
 *.7z
 *.npy
 /Наука и технологии.docx
+
+# Local team assets, development notes and one-off tools
+/dlya-komandy/
+/docs/DESIGN.md
+/docs/RESEARCH.md
+/docs/VERIFICATION.md
+/docs/ui-evidence/
+/scripts/
+/tests/
+/start.ps1
+~$*
