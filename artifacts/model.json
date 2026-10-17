@@ -1,7 +1,7 @@
 {
-  "id": "64c553a219c6",
+  "id": "b89c7bae64d7",
   "pipeline": "impact-cascade-v3-light-denoise",
-  "created": "2026-10-17T09:12:50.523619+00:00",
+  "created": "2026-10-17T11:16:02.284554+00:00",
   "n_train": 55,
   "n_fit": 165,
   "augmentation": {

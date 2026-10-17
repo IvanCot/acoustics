@@ -92,6 +92,7 @@ body:not([data-page=analyze]) .case-stamp .stamp-number span{font-size:32px!impo
 .multiple-switch span span{margin-top:6px;line-height:1.5}
 .multiple-switch:has(input:checked){border-color:#d8ff63;background:#d8ff6310}
 .impact-row td:first-child{padding-left:24px}
+.batch-table th,.batch-table td:nth-child(2),.batch-table td:nth-child(4) .button{white-space:nowrap;word-break:normal;overflow-wrap:normal}
 body[data-page="analyze"] .page-heading{margin-bottom:0;padding-bottom:28px}
 #page-analyze>.analysis-grid{border-top:1px solid var(--border);padding-top:28px}
 @media(max-width:600px){body[data-page="analyze"] .page-heading{display:grid;grid-template-columns:minmax(0,1fr) 50px;align-items:start;gap:8px;padding-bottom:20px}.case-stamp{width:50px;min-width:0;height:auto;border:0;padding:0;justify-content:flex-start}#page-analyze>.analysis-grid{padding-top:20px}}
