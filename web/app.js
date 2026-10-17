@@ -111,6 +111,7 @@ function renderState() {
   const fitCount = (model) => model?.n_fit && model.n_fit > model.n_train
     ? ` · ${model.n_fit} примеров с аугментацией` : "";
   const trainingRecordings = counts.train.wood + counts.train.metal + counts.train.other;
+  const augmentedTrainingExamples = state.gate_model?.n_fit ?? trainingRecordings * 3;
   const testCounts = ["val", "test"].reduce((total, split) => ({
     wood: total.wood + counts[split].wood,
     metal: total.metal + counts[split].metal,
@@ -121,7 +122,7 @@ function renderState() {
     ? `<br>После аугментации: материал ${state.model.n_fit ?? state.model.n_train} · детектор ${state.gate_model.n_fit ?? state.gate_model.n_train}`
     : "";
   $("data-summary").innerHTML = `
-    <div class="data-stat"><h2>Обучение</h2><div class="count">${trainingRecordings}</div><small>Дерево: ${counts.train.wood} · Металл: ${counts.train.metal}<br>Неподходящие: ${counts.train.other}${augmentationDetails}</small></div>
+    <div class="data-stat"><h2>Обучение</h2><div class="count">${augmentedTrainingExamples}</div><small>${trainingRecordings} исходных записей с учётом аугментации<br>Дерево: ${counts.train.wood} · Металл: ${counts.train.metal}<br>Неподходящие: ${counts.train.other}${augmentationDetails}</small></div>
     <div class="data-stat"><h2>Тест</h2><div class="count">${testRecordings}</div><small>Валидация + тест<br>Дерево: ${testCounts.wood} · Металл: ${testCounts.metal} · Неподходящие: ${testCounts.other}</small></div>`;
   $("training-status").textContent = `01 · Детектор: ${state.gate_trained ? "готов · " + state.gate_model.n_train + " записей" + fitCount(state.gate_model) : "нужны обучение и корректные данные"}\n02 · Материал: ${state.material_trained ? "готов · " + state.model.n_train + " стуков" + fitCount(state.model) : "нужны обучение и корректные данные"}`;
   const issues = [...state.issues, ...state.errors.map(e => `${e.path}: ${e.error}`)];
