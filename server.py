@@ -17,8 +17,9 @@ ROOT = Path(__file__).resolve().parent
 MAX_BODY = 17 * 1024 * 1024
 
 
-def make_handler(experiment):
+def make_handler(experiment, *, hosted_read_only=False):
     lock = threading.RLock()
+    public_host = os.environ.get("PUBLIC_HOST") or os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
     class Handler(BaseHTTPRequestHandler):
         def end_headers(self):
@@ -36,12 +37,16 @@ def make_handler(experiment):
             self.wfile.write(raw)
 
         def local_request(self):
-            expected = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
-            if self.headers.get("Host") not in expected:
-                self.send(403, {"error": "Разрешён только локальный адрес."})
+            local_hosts = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+            allowed_hosts = local_hosts | ({public_host} if public_host else set())
+            if self.headers.get("Host") not in allowed_hosts:
+                self.send(403, {"error": "Адрес запроса не разрешён."})
                 return False
             origin = self.headers.get("Origin")
-            if origin and origin not in {"http://" + host for host in expected}:
+            allowed_origins = {f"http://{host}" for host in local_hosts}
+            if public_host:
+                allowed_origins.add(f"https://{public_host}")
+            if origin and origin not in allowed_origins:
                 self.send(403, {"error": "Запрос из другого сайта запрещён."})
                 return False
             return True
@@ -52,14 +57,28 @@ def make_handler(experiment):
             path = urlsplit(self.path).path
             if path == "/api/state":
                 with lock:
-                    self.send(200, experiment.state())
+                    state = experiment.state()
+                    state["hosted_read_only"] = hosted_read_only
+                    if hosted_read_only:
+                        state["report"] = None
+                        state["validation"] = None
+                    self.send(200, state)
             elif path == "/api/report":
+                if hosted_read_only:
+                    self.send(404, {"error": "Отчёт доступен только в локальной версии."})
+                    return
                 with lock:
                     self.send(200, experiment.state()["report"])
             elif path in {"/", "/index.html", "/styles.css", "/app.js", "/favicon.svg"}:
                 name = "index.html" if path == "/" else path[1:]
                 mime = {"html": "text/html; charset=utf-8", "css": "text/css; charset=utf-8", "js": "text/javascript; charset=utf-8", "svg": "image/svg+xml"}[name.rsplit(".", 1)[1]]
-                self.send(200, (ROOT / "web" / name).read_bytes(), mime)
+                content = (ROOT / "web" / name).read_bytes()
+                if hosted_read_only and name == "index.html":
+                    content = content.replace("Всё остаётся у вас".encode(), "Анализ на сервере".encode())
+                    content = content.replace("Аудио обрабатывается локально.<br>Без облака и API-ключей.".encode(),
+                                              "Загруженные аудиозаписи передаются на сервер для обработки.".encode())
+                    content = content.replace("ЛОКАЛЬНЫЙ РЕЖИМ".encode(), "ПУБЛИЧНЫЙ РЕЖИМ".encode())
+                self.send(200, content, mime)
             else:
                 self.send(404, {"error": "Не найдено."})
 
@@ -77,6 +96,9 @@ def make_handler(experiment):
                 if not isinstance(payload, dict):
                     raise ExperimentError("Ожидается объект JSON.")
                 path = urlsplit(self.path).path
+                if hosted_read_only and path != "/api/analyze":
+                    self.send(403, {"error": "В публичной версии доступны только анализ аудио и просмотр результата."})
+                    return
                 with lock:
                     if path in {"/api/analyze", "/api/data"}:
                         try:
@@ -107,12 +129,15 @@ def make_handler(experiment):
 
 def main():
     parser = argparse.ArgumentParser(description="Acoustic Detective — local experiment")
-    parser.add_argument("--port", type=int, default=8765)
+    parser.add_argument("--host", default=os.environ.get("HOST", "127.0.0.1"))
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8765")))
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
     parser.add_argument("--artifacts-dir", type=Path, default=ROOT / "artifacts")
     args = parser.parse_args()
-    server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(Experiment(args.data_dir, args.artifacts_dir)))
-    print(f"Acoustic Detective: http://127.0.0.1:{args.port}  (PID {os.getpid()}, Ctrl+C to stop)", flush=True)
+    hosted_read_only = os.environ.get("HOSTED_READ_ONLY", "false").lower() == "true"
+    server = ThreadingHTTPServer((args.host, args.port), make_handler(
+        Experiment(args.data_dir, args.artifacts_dir), hosted_read_only=hosted_read_only))
+    print(f"Acoustic Detective: http://{args.host}:{args.port}  (PID {os.getpid()}, Ctrl+C to stop)", flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

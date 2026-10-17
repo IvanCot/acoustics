@@ -18,7 +18,9 @@ const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
 
 function navigate() {
   const candidate = location.hash.slice(1);
-  const page = Object.hasOwn(headings, candidate) ? candidate : "analyze";
+  const requestedPage = Object.hasOwn(headings, candidate) ? candidate : "analyze";
+  const page = state?.hosted_read_only && requestedPage !== "analyze" ? "analyze" : requestedPage;
+  if (page !== requestedPage) history.replaceState(null, "", "#analyze");
   document.querySelectorAll(".page").forEach(el => { el.hidden = el.id !== `page-${page}`; });
   document.querySelectorAll(".nav-item").forEach(el => {
     const active = el.dataset.page === page;
@@ -63,7 +65,7 @@ async function busy(button, message, operation) {
   document.body.classList.add("busy");
   document.querySelectorAll(".page").forEach(el => el.setAttribute("aria-busy", "true"));
   try { await operation(); }
-  catch (error) { notify(error.message || "Нет связи с локальным сервером. Проверьте, что server.py запущен."); }
+  catch (error) { notify(error.message || "Сервер анализа недоступен. Проверьте подключение и попробуйте ещё раз."); }
   finally {
     isBusy = false;
     button.innerHTML = original;
@@ -79,7 +81,7 @@ function updateButtons() {
   $("train-btn").disabled = locked || !state?.can_train;
   $("train-gate-btn").disabled = locked || !state?.can_train_gate;
   $("train-material-btn").disabled = locked || !state?.can_train_material;
-  $("evaluate-btn").disabled = locked || !( $("evaluation-mode").value === "material" ? state?.can_evaluate_material : state?.can_evaluate );
+  $("evaluate-btn").disabled = locked || state?.hosted_read_only || !( $("evaluation-mode").value === "material" ? state?.can_evaluate_material : state?.can_evaluate );
   $("analyze-btn").disabled = locked || !batch.length;
   $("record-btn").disabled = isBusy || recordingPending;
   for (const id of ["save-data-btn", "refresh-data", "audio-file", "dataset-files", "dataset-class", "dataset-split", "dataset-session", "evaluation-mode"]) $(id).disabled = locked;
@@ -93,6 +95,16 @@ function updateButtons() {
 
 async function refresh() {
   state = await api("/api/state");
+  if (state.hosted_read_only) {
+    document.querySelectorAll('.nav-item[data-page="dataset"], .nav-item[data-page="quality"]').forEach(item => {item.style.display = "none";});
+    $("result-action").hidden = true;
+    document.querySelector(".next-steps").hidden = true;
+    document.querySelector(".local-card").innerHTML = `<span class="status-dot"></span><strong>Анализ на сервере</strong><p>Загруженные аудиозаписи передаются на сервер для обработки.</p>`;
+    document.querySelector(".sidebar-footer span").textContent = "ПУБЛИЧНЫЙ РЕЖИМ";
+    state.report = null;
+    state.validation = null;
+    navigate();
+  }
   renderState();
 }
 
@@ -502,7 +514,7 @@ let resizeTimer;
 window.addEventListener("resize", () => {clearTimeout(resizeTimer); resizeTimer = setTimeout(drawPlots, 100);});
 navigate();
 drawPlots();
-refresh().catch(() => notify("Нет связи с локальным сервером. Запустите server.py и обновите страницу."));
+refresh().catch(() => notify("Сервер анализа недоступен. Проверьте подключение и попробуйте ещё раз."));
 
 $("multiple-impacts").addEventListener("change", () => {
   $("file-limit").textContent = $("multiple-impacts").checked ? "Отдельные удары с паузами · до 10 секунд · до 12 МБ каждый" : "Один стук на файл · до 10 секунд · до 12 МБ каждый";
